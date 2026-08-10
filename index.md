@@ -318,7 +318,12 @@ html.dark-mode .subheadline-container::after {
     document.addEventListener('turbo:load', () => {
         const getStartedBtn = document.getElementById('cta-get-started');
         if (getStartedBtn) {
-            const cachedUser = localStorage.getItem('cachedUser');
+            let cachedUser = null;
+            try {
+                cachedUser = localStorage.getItem('cachedUser');
+            } catch (e) {
+                console.warn("localStorage is disabled or not accessible:", e);
+            }
             if (!cachedUser) {
                 getStartedBtn.href = "{{ 'auth.html' | relative_url }}";
             }
@@ -413,21 +418,28 @@ html.dark-mode .subheadline-container::after {
         async function loadHomeArticles() {
             if (loader) loader.classList.add('visible');
             try {
-                // Try cache first
-                const cachedData = localStorage.getItem(CACHE_KEY);
-                if (cachedData) {
-                    allArticles = JSON.parse(cachedData);
-                    // Skip the absolute latest article (index 0) as it is in the hero story
-                    renderArticles(allArticles.slice(1));
-                    syncIndicator();
+                // Try cache first with try-catch block to prevent SecurityError in Incognito mode
+                try {
+                    const cachedData = localStorage.getItem(CACHE_KEY);
+                    if (cachedData) {
+                        allArticles = JSON.parse(cachedData);
+                        renderArticles(allArticles.slice(1));
+                        syncIndicator();
+                    }
+                } catch (cacheErr) {
+                    console.warn("Failed to load cached homepage articles:", cacheErr);
                 }
                 
                 // Fetch fresh
-                const response = await fetch('/search.json');
+                const response = await fetch('{{ "/search.json" | relative_url }}');
                 if (response.ok) {
                     const freshArticles = await response.json();
                     allArticles = freshArticles;
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(freshArticles));
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(freshArticles));
+                    } catch (cacheErr) {
+                        console.warn("Failed to cache fresh homepage articles:", cacheErr);
+                    }
                     // Re-render, skipping the absolute latest one
                     const activeBtn = filtersBar ? filtersBar.querySelector('.filter-btn.active') : null;
                     const tag = activeBtn ? activeBtn.getAttribute('data-tag') : '';

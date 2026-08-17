@@ -4,29 +4,31 @@
             
             <div class="md:col-span-1">
                 <h2 class="text-2xl font-bold text-white mb-4">The Muslim Post</h2>
-                <p class="text-gray-400 text-sm mb-6">Reporting on global affairs and the Muslim world with clarity and integrity.</p>
+                <p class="text-gray-400 text-sm mb-6">Reporting on global affairs and world news with clarity and integrity.</p>
                 <div class="flex space-x-4">
-                    <a href="https://x.com/TMPnewsAgency" class="text-gray-400 hover:text-white transition-colors" aria-label="X (Twitter)">
+                    <a href="https://x.com/TMPnewsAgency" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="X (Twitter)">
                      <i class="fa-brands fa-x-twitter fa-lg"></i>
                     </a>
 
-                    <a href="https://upscrolled.com/tmpnews" class="text-gray-400 hover:text-white transition-colors" aria-label="Upscrolled">
+                    <a href="https://upscrolled.com/@TMPnews" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="Upscrolled">
                      <i class="fa-solid fa-scroll fa-lg"></i>
                     </a>
 
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
+                    <!--
+                    <a href="#" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
                      <i class="fa-brands fa-facebook-f fa-lg"></i>
                     </a>
+                    -->
 
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
+                    <a href="https://www.instagram.com/tmpnewsofficial" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
                      <i class="fa-brands fa-instagram fa-lg"></i>
                     </a>
 
-                    <a href="https://youtube.com/@themuslimpostofficial" class="text-gray-400 hover:text-white transition-colors" aria-label="YouTube">
+                    <a href="https://youtube.com/@themuslimpostofficial" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="YouTube">
                      <i class="fa-brands fa-youtube fa-lg"></i>
-                   </a>
+                    </a>
 
-                    <a href="https://t.me/themuslimpost" class="text-gray-400 hover:text-white transition-colors" aria-label="Telegram">
+                    <a href="https://t.me/themuslimpost" target="_blank" rel="noopener noreferrer" data-turbo="false" class="text-gray-400 hover:text-white transition-colors" aria-label="Telegram">
                      <i class="fa-brands fa-telegram fa-lg"></i>
                     </a>
             </div>
@@ -52,8 +54,8 @@
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
                 <ul class="space-y-3">
-                    <li><a href="/about.html" class="hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="/what-is-user-post.html" class="hover:text-white transition-colors text-indigo-400">What is User Post?</a></li> <li><a href="/support.html" class="hover:text-white transition-colors">Support</a></li>
+                    <li><a href="/about/" class="hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="/what-is-user-post/" class="hover:text-white transition-colors text-indigo-400">What is User Post?</a></li> <li><a href="/support.html" class="hover:text-white transition-colors">Support</a></li>
                     <li>
                         <a href="mailto:contact@tmpnews.com?subject=Inquiry%20from%20Website" class="hover:text-white transition-colors flex items-center">
                             <i class="fas fa-envelope mr-2"></i> Contact Us
@@ -66,10 +68,10 @@
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Legal</h3>
                 <ul class="space-y-3">
-                    <li><a href="/privacy.html" class="hover:text-white transition-colors">Privacy Policy</a></li>
-                    <li><a href="/terms.html" class="hover:text-white transition-colors">Terms of Service</a></li>
-                    <li><a href="/account-deletion.html" class="hover:text-white transition-colors">Account Deletion</a></li>
-                    <li><a href="/refund-policy.html" class="hover:text-white transition-colors">Refund Policy</a></li>
+                    <li><a href="/privacy/" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="/terms/" class="hover:text-white transition-colors">Terms of Service</a></li>
+                    <li><a href="/account-deletion/" class="hover:text-white transition-colors">Account Deletion</a></li>
+                    <li><a href="/refund-policy/" class="hover:text-white transition-colors">Refund Policy</a></li>
                 </ul>
             </div>
 
@@ -77,9 +79,6 @@
         <div class="mt-12 border-t border-gray-700 pt-8 text-center">
             <p class="text-sm text-gray-400">
                 &copy; {{ site.time | date: '%Y' }} TMP News. All rights reserved.
-            </p>
-            <p class="text-xs text-gray-500 mt-2">
-                Content on this site is protected by copyright law. Unauthorized reproduction or distribution is strictly prohibited.
             </p>
         </div>
     </div>

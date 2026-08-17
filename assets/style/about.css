@@ -252,18 +252,6 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* Fade-in Animation */
-.fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .hero-content h1 {
@@ -274,17 +262,14 @@
     }
 
     /* --- SVG SCALING FIX --- */
-    /* 1. Scale the entire SVG container down to maintain proportion */
     .vector-animation, .team-logo-svg {
-        width: 150px; /* Reduce SVG container size */
+        width: 150px;
         height: 150px;
     }
     
-    /* 2. Adjust TMP text size relative to the new container size */
     .tmp-text {
-        font-size: 85px; /* Adjusted font size for 150px container (was 80px for 200px) */
+        font-size: 85px;
     }
-    /* ------------------------ */
     
     .timeline::after {
         left: 20px;
@@ -302,8 +287,8 @@
     }
 }
 
-/* NEW CODE - VISIBLE BY DEFAULT */
-.fade-in {
+/* Fade-in Animation - Scoped to About Page */
+.about-page-body .fade-in {
     /* Start visible so users never see a blank page */
     opacity: 1; 
     transform: translateY(0);
@@ -312,13 +297,13 @@
 
 /* Only hide elements initially if we can animate them */
 @media (prefers-reduced-motion: no-preference) {
-    .fade-in:not(.visible) {
+    .about-page-body .fade-in:not(.visible) {
         opacity: 0;
         transform: translateY(30px);
     }
 }
 
-.fade-in.visible {
+.about-page-body .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
 }

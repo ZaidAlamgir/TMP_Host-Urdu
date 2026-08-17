@@ -107,6 +107,9 @@
                 if (typeof window.AndroidInterface !== 'undefined') {
                     document.documentElement.classList.add('is-android-app');
                 }
+                if (window.location.search.includes('app=true')) {
+                    document.documentElement.classList.add('is-embed-app');
+                }
                 
                 const isDarkMode = window.AndroidInterface.getDarkModeStatus() === 'true';
                 const themeMeta = document.getElementById('theme-color-meta'); 
@@ -116,11 +119,12 @@
                     if (themeMeta) themeMeta.setAttribute('content', '#111827');
                 }
             } catch (e) {
-                console.log('Flicker-Fix: Not in app. Defaulting to light mode.');
+                console.log('Flicker-Fix: Defaulting to light mode.');
             }
         })();
     </script>
     <style>
+        /* Rules for native app mode (MainActivity) */
         html.is-android-app #header-placeholder,
         html.is-android-app .header {
             display: none !important;
@@ -131,6 +135,23 @@
         }
         html.is-android-app body {
             padding-top: 0 !important;
+        }
+
+        /* Rules for iframe embed mode (Map panel) */
+        html.is-embed-app .bottom-nav,
+        html.is-embed-app footer,
+        html.is-embed-app .ad-container,
+        html.is-embed-app .adsbygoogle,
+        html.is-embed-app .index-menu-button,
+        html.is-embed-app .user-icon-link {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            pointer-events: none !important;
+        }
+        html.is-embed-app body {
+            padding-bottom: 0 !important;
         }
     </style>
     <link rel="stylesheet" href="{{ '/assets/style/style.css' | relative_url }}">

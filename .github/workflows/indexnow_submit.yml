@@ -13,16 +13,16 @@ jobs:
       - name: 🚀 Submit sitemap URLs to IndexNow (Bing + Yandex + others)
         uses: bojieyang/indexnow-action@v2
         with:
-          sitemap-location: 'https://www.tmpnews.com/sitemap.xml'
+          sitemap-location: 'https://theurdupost.tmpnews.com/sitemap.xml'
           key: ${{ secrets.INDEXNOW_KEY }}
 
       - name: 🔔 Ping Google Sitemap
         run: |
-          curl -s "https://www.google.com/ping?sitemap=https://www.tmpnews.com/sitemap.xml"
-          curl -s "https://www.google.com/ping?sitemap=https://www.tmpnews.com/news-sitemap.xml"
+          curl -s "https://www.google.com/ping?sitemap=https://theurdupost.tmpnews.com/sitemap.xml"
+          curl -s "https://www.google.com/ping?sitemap=https://theurdupost.tmpnews.com/news-sitemap.xml"
           echo "Google sitemap ping sent."
 
       - name: 🔔 Ping Bing Sitemap
         run: |
-          curl -s "https://www.bing.com/ping?sitemap=https://www.tmpnews.com/sitemap.xml"
+          curl -s "https://www.bing.com/ping?sitemap=https://theurdupost.tmpnews.com/sitemap.xml"
           echo "Bing sitemap ping sent."

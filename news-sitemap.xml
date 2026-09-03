@@ -10,8 +10,8 @@ permalink: /news-sitemap.xml
         <loc>{{ post.url | absolute_url }}</loc>
         <news:news>
           <news:publication>
-            <news:name>The Muslim Post | TMP News</news:name>
-            <news:language>en</news:language>
+            <news:name>The Urdu Post | TMP News</news:name>
+            <news:language>ur</news:language>
           </news:publication>
           <news:publication_date>{{ post.date | date_to_xmlschema }}</news:publication_date>
           <news:title>{{ post.title | strip_html | escape }}</news:title>

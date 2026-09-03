@@ -202,19 +202,19 @@
         
         function renderArticles(articlesToRender) {
             if (!articlesToRender || articlesToRender.length === 0) {
-                homeGrid.innerHTML = '<p style="text-align:center;color:#606770;grid-column:1/-1;padding:2rem;">No articles found in this category.</p>';
+                homeGrid.innerHTML = '<p style="text-align:center;color:#606770;grid-column:1/-1;padding:2rem;">اس زمرے میں کوئی خبر دستیاب نہیں ہے۔</p>';
                 return;
             }
             const limit = articlesToRender.slice(0, 6);
             homeGrid.innerHTML = limit.map(post => {
                 const image = post.image || 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image';
                 const alt = post.image_description || 'Article image';
-                const subheadline = post.subheadline || 'Click to read more.';
+                const subheadline = post.subheadline || 'مکمل خبر پڑھنے کے لیے کلک کریں۔';
                 let formattedDate = '';
                 if (post.date) {
                     const d = new Date(post.date);
                     const options = { month: 'long', day: 'numeric', year: 'numeric' };
-                    formattedDate = d.toLocaleDateString('en-US', options);
+                    formattedDate = d.toLocaleDateString('ur', options);
                 }
                 return `
                 <a href="${post.url}" class="news-card fade-in">
@@ -227,7 +227,7 @@
                         <div class="subheadline-container">
                             <p class="news-card-subheadline" style="font-size:0.95rem;color:#606770;line-height:1.5;margin:0;">${subheadline}</p>
                         </div>
-                        <span class="read-more-text" style="font-size:0.85rem;font-weight:800;color:#0073e6;text-transform:uppercase;margin-top:auto;">Read More &#8594;</span>
+                        <span class="read-more-text" style="font-size:0.85rem;font-weight:800;color:#0073e6;text-transform:uppercase;margin-top:auto;">مزید پڑھیں &#8594;</span>
                     </div>
                 </a>`;
             }).join('');

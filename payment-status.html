@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Payment Status - The Muslim Post
+title: Payment Status - The Urdu Post
 parmalink: /payment-status.html
 extra_css:
   - /assets/style/support.css
@@ -8,41 +8,52 @@ extra_css:
 <main class="support-container">
     <div id="status-container" style="padding: 2rem; text-align: center;">
         <div class="spinner"></div>
-        <p>Verifying payment status...</p>
+        <p>ادائیگی کی تصدیق کی جا رہی ہے...</p>
     </div>
 </main>
 
 <script>
-    document.addEventListener('turbo:load', () => {
-        const statusContainer = document.getElementById('status-container');
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        
-        let html = '';
+    (function() {
+        function initPaymentStatus() {
+            const statusContainer = document.getElementById('status-container');
+            if (!statusContainer) return;
 
-        if (code === 'PAYMENT_SUCCESS') {
-            html = `
-                <div class="card-icon" style="color: #10B981;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 64px; height: 64px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h1 style="color: #10B981; font-size: 2rem; margin-bottom: 1rem;">Payment Successful!</h1>
-                <p>Thank you for your generous support. Your contribution helps us continue our work.</p>
-                <a href="/" class="card-button" style="background: #10B981; color: white; display: inline-block; width: auto; margin-top: 2rem;">Go to Homepage</a>
-            `;
-        } else {
-             html = `
-                <div class="card-icon" style="color: #EF4444;">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 64px; height: 64px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                </div>
-                <h1 style="color: #EF4444; font-size: 2rem; margin-bottom: 1rem;">Payment Failed</h1>
-                <p>Unfortunately, we could not process your payment. Please try again or contact support if the issue persists.</p>
-                <a href="/support.html" class="card-button" style="background: #EF4444; color: white; display: inline-block; width: auto; margin-top: 2rem;">Try Again</a>
-            `;
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            let html = '';
+
+            if (code === 'PAYMENT_SUCCESS') {
+                html = `
+                    <div class="card-icon" style="color: #10B981;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 64px; height: 64px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h1 style="color: #10B981; font-size: 2rem; margin-bottom: 1rem;">ادائیگی کامیاب رہی!</h1>
+                    <p>آپ کے تعاون کا بہت شکریہ۔ آپ کا تعاون ہماری آزاد صحافت کو جاری رکھنے میں مددگار ہے۔</p>
+                    <a href="/" class="card-button" style="background: #10B981; color: white; display: inline-block; width: auto; margin-top: 2rem;">ہوم پیج پر جائیں</a>
+                `;
+            } else {
+                 html = `
+                    <div class="card-icon" style="color: #EF4444;">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 64px; height: 64px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <h1 style="color: #EF4444; font-size: 2rem; margin-bottom: 1rem;">ادائیگی ناکام ہوگئی</h1>
+                    <p>بدقسمتی سے، آپ کی ادائیگی مکمل نہیں ہو سکی۔ براہ کرم دوبارہ کوشش کریں یا سپورٹ سے رابطہ کریں۔</p>
+                    <a href="/support.html" class="card-button" style="background: #EF4444; color: white; display: inline-block; width: auto; margin-top: 2rem;">دوبارہ کوشش کریں</a>
+                `;
+            }
+            statusContainer.innerHTML = html;
         }
-        statusContainer.innerHTML = html;
-    });
+
+        document.addEventListener('turbo:load', initPaymentStatus);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPaymentStatus);
+        } else {
+            initPaymentStatus();
+        }
+    })();
 </script>

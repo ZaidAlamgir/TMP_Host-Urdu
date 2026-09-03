@@ -1,18 +1,18 @@
 ---
 layout: default
-title: Home - The Muslim Post
+title: Home - The Urdu Post
 ---
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "The Muslim Post",
-  "url": "https://www.tmpnews.com/",
+  "name": "The Urdu Post",
+  "url": "https://theurdupost.tmpnews.com/",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://www.tmpnews.com/search.html?q={search_term_string}"
+      "urlTemplate": "https://theurdupost.tmpnews.com/search.html?q={search_term_string}"
     },
     "query-input": "required name=search_term_string"
   }
@@ -210,8 +210,8 @@ html.dark-mode .subheadline-container::after {
 }
 </style>
 <div class="support-cta-banner">
-    <p>Independent journalism is more important than ever. Please consider supporting The Muslim Post today.</p>
-    <a href="{{ '/support/' | relative_url }}" class="support-cta-button">Support TMP</a>
+    <p>غیر جانبدار اور آزاد صحافت آج پہلے سے کہیں زیادہ ضروری ہے۔ TMPnews (The Urdu Post) کا ساتھ دیں۔</p>
+    <a href="{{ '/support/' | relative_url }}" class="support-cta-button">تعاون کریں</a>
 </div>
 {% assign latest_post = site.posts.first %}
 <main class="home-main" style="flex-grow: 1;">
@@ -223,12 +223,12 @@ html.dark-mode .subheadline-container::after {
                 <p class="news-card-date">{{ latest_post.date | date: "%B %d, %Y" }}</p>
             </div>
             <div class="news-card-text hero-news-card-text">
-                <span class="hero-kicker">Lead Story</span>
+                <span class="hero-kicker">اہم ترین خبر</span>
                 <h3 class="news-card-headline hero-headline" style="font-family:'Merriweather',serif;font-weight:900;margin-bottom:0.5rem;">{{ latest_post.title }}</h3>
                 <div class="subheadline-container hero-subheadline-container">
                     <p class="news-card-subheadline">{{ latest_post.subheadline | default: latest_post.content | strip_html | truncatewords: 35 }}</p>
                 </div>
-                <span class="read-more-text">Read More &rarr;</span>
+                <span class="read-more-text">مزید پڑھیں &rarr;</span>
             </div>
         </a>
     </section>
@@ -238,38 +238,38 @@ html.dark-mode .subheadline-container::after {
         
         <!-- Live Filterable Latest Reports Grid (NO reveal-on-scroll here so it is instantly visible) -->
         <section class="content-section latest-reports-section">
-            <h2 class="section-title">Latest Reports</h2>
-            <p class="section-subtitle">Stay informed with our latest news coverage, analysis, and regional stories.</p>
+            <h2 class="section-title">تازہ رپورٹس</h2>
+            <p class="section-subtitle">ملک و دنیا کی تازہ ترین خبروں، تجزیوں اور خصوصی رپورٹس سے باخبر رہیں۔</p>
             
             <div class="category-filters-container">
                 <div class="category-filters" id="home-filters-bar">
                     <div class="filter-indicator" id="home-filter-indicator"></div>
-                    <button class="filter-btn active" data-tag="">All</button>
-                    <button class="filter-btn" data-tag="world-politics">World Politics</button>
-                    <button class="filter-btn" data-tag="indian-politics">Indian Politics</button>
-                    <button class="filter-btn" data-tag="muslim-world">Muslim World</button>
-                    <button class="filter-btn" data-tag="technology">Technology</button>
-                    <button class="filter-btn" data-tag="medical-science">Medical Science</button>
-                    <button class="filter-btn" data-tag="global-economy">Global Economy</button>
-                    <button class="filter-btn" data-tag="art-culture">Art & Culture</button>
-                    <button class="filter-btn" data-tag="weather">Weather</button>
-                    <button class="filter-btn" data-tag="sports">Sports</button>
-                    <button class="filter-btn" data-tag="national-news">National News</button>
-                    <button class="filter-btn" data-tag="international-news">International News</button>
-                    <button class="filter-btn" data-tag="history">History</button>
-                    <button class="filter-btn" data-tag="indian-muslims">Indian Muslims</button>
-                    <button class="filter-btn" data-tag="middle-east">Middle East</button>
-                    <button class="filter-btn" data-tag="climate">Climate</button>
-                    <button class="filter-btn" data-tag="defense">Defense</button>
-                    <button class="filter-btn" data-tag="south-asia">South Asia</button>
-                    <button class="filter-btn" data-tag="africa">Africa</button>
-                    <button class="filter-btn" data-tag="europe">Europe</button>
-                    <button class="filter-btn" data-tag="central-asia">Central Asia</button>
-                    <button class="filter-btn" data-tag="crime-alert">Crime Alert</button>
-                    <button class="filter-btn" data-tag="south-east-asia">Southeast Asia</button>
-                    <button class="filter-btn" data-tag="east-asia">East Asia</button>
-                    <button class="filter-btn" data-tag="north-america">North America</button>
-                    <button class="filter-btn" data-tag="south-america">South America</button>
+                    <button class="filter-btn active" data-tag="">تمام</button>
+                    <button class="filter-btn" data-tag="world-politics">عالمی سیاست</button>
+                    <button class="filter-btn" data-tag="indian-politics">ہندوستانی سیاست</button>
+                    <button class="filter-btn" data-tag="muslim-world">مسلم دنیا</button>
+                    <button class="filter-btn" data-tag="technology">ٹیکنالوجی</button>
+                    <button class="filter-btn" data-tag="medical-science">طبی سائنس</button>
+                    <button class="filter-btn" data-tag="global-economy">عالمی معیشت</button>
+                    <button class="filter-btn" data-tag="art-culture">فن و ثقافت</button>
+                    <button class="filter-btn" data-tag="weather">موسم</button>
+                    <button class="filter-btn" data-tag="sports">کھیل</button>
+                    <button class="filter-btn" data-tag="national-news">قومی خبریں</button>
+                    <button class="filter-btn" data-tag="international-news">بین الاقوامی</button>
+                    <button class="filter-btn" data-tag="history">تاریخ</button>
+                    <button class="filter-btn" data-tag="indian-muslims">ہندوستانی مسلمان</button>
+                    <button class="filter-btn" data-tag="middle-east">مشرق وسطیٰ</button>
+                    <button class="filter-btn" data-tag="climate">ماحولیات</button>
+                    <button class="filter-btn" data-tag="defense">دفاع</button>
+                    <button class="filter-btn" data-tag="south-asia">جنوبی ایشیا</button>
+                    <button class="filter-btn" data-tag="africa">افریقہ</button>
+                    <button class="filter-btn" data-tag="europe">یورپ</button>
+                    <button class="filter-btn" data-tag="central-asia">وسطی ایشیا</button>
+                    <button class="filter-btn" data-tag="crime-alert">کرائم الرٹ</button>
+                    <button class="filter-btn" data-tag="south-east-asia">جنوب مشرقی ایشیا</button>
+                    <button class="filter-btn" data-tag="east-asia">مشرقی ایشیا</button>
+                    <button class="filter-btn" data-tag="north-america">شمالی امریکہ</button>
+                    <button class="filter-btn" data-tag="south-america">جنوبی امریکہ</button>
                 </div>
             </div>
             
@@ -277,70 +277,95 @@ html.dark-mode .subheadline-container::after {
             <div id="home-loader" class="loader"></div>
             
             <div style="text-align: center; margin-top: 3rem;">
-                <a href="{{ '/news/hub/' | relative_url }}" class="explore-hub-btn">Explore Full News Hub</a>
+                <a href="{{ '/news/hub/' | relative_url }}" class="explore-hub-btn">پورا نیوز ہب دیکھیں &rarr;</a>
             </div>
         </section>
 
         <hr class="section-divider">
         
         <section class="content-section features-section reveal-on-scroll">
-            <h2 class="section-title">Why Join Us?</h2>
-            <p class="section-subtitle">A platform designed for sharing knowledge and fostering discussion.</p>
+            <h2 class="section-title">ہم سے کیوں جڑیں؟</h2>
+            <p class="section-subtitle">علم کا اشتراک کرنے اور بامقصد مباحثوں کو فروغ دینے کا پلیٹ فارم۔</p>
             <div class="features-grid">
                 <div class="feature-item">
                     <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
-                    <h3>Share Your Voice</h3>
-                    <p>Easily post your articles, research, and opinions for a global audience.</p>
+                    <h3>اپنی آواز بلند کریں</h3>
+                    <p>اپنے مضامین، تحقیق اور آراء دنیا بھر کے قارئین تک باآسانی پہنچائیں۔</p>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
-                    <h3>Engage with Peers</h3>
-                    <p>Connect with a community of experts and enthusiasts in various fields.</p>
+                    <h3>ماہرین سے جڑیں</h3>
+                    <p>مختلف شعبوں کے دانشوروں، محققین اور ماہرین کی کمیونٹی سے جڑیں۔</p>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.5 12.5"/><path d="M2 12.5a10 10 0 0 0 18.5-1"/></svg></div>
-                    <h3>Stay Updated</h3>
-                    <p>Follow the latest trends and discussions with our curated news section.</p>
+                    <h3>باخبر رہیں</h3>
+                    <p>ہمارے منتخب اور مستند تجزیات کے ساتھ ہمیشہ آگے رہیں۔</p>
                 </div>
             </div>
         </section>
     </div>
     <section class="cta-section">
         <div class="cta-content reveal-on-scroll">
-            <h1>Share Your Knowledge</h1>
-            <p>Join a community of thinkers, learners, and experts. Discover insightful posts and contribute your own perspective.</p>
-            <a id="cta-get-started" href="{{ '/post/' | relative_url }}" class="cta-button">Get Started</a>
+            <h1>اپنا علم اور خیالات شیئر کریں</h1>
+            <p>دانشوروں، طلبہ اور ماہرین کی کمیونٹی کا حصہ بنیں۔ معلوماتی مضامین پڑھیں اور اپنی تحریر سے معاشرے کو آگاہ کریں۔</p>
+            <a id="cta-get-started" href="{{ '/post/' | relative_url }}" class="cta-button">شروع کریں</a>
         </div>
     </section>
 </main>
 
 <script>
-    document.addEventListener('turbo:load', () => {
-        const getStartedBtn = document.getElementById('cta-get-started');
-        if (getStartedBtn) {
-            let cachedUser = null;
-            try {
-                cachedUser = localStorage.getItem('cachedUser');
-            } catch (e) {
-                console.warn("localStorage is disabled or not accessible:", e);
+    (function() {
+        function initHomePage() {
+            // Check authentication state for CTA button
+            const getStartedBtn = document.getElementById('cta-get-started');
+            if (getStartedBtn) {
+                let cachedUser = null;
+                try {
+                    cachedUser = localStorage.getItem('cachedUser');
+                } catch (e) {
+                    console.warn("localStorage is disabled or not accessible:", e);
+                }
+                if (!cachedUser) {
+                    getStartedBtn.href = "{{ 'auth.html' | relative_url }}";
+                }
             }
-            if (!cachedUser) {
-                getStartedBtn.href = "{{ 'auth.html' | relative_url }}";
+            
+            // Initialize IntersectionObserver for scroll-reveal animations
+            const revealElements = document.querySelectorAll('.reveal-on-scroll');
+            if (revealElements.length > 0) {
+                if ('IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('is-visible');
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.05, rootMargin: "0px 0px 50px 0px" });
+                    
+                    revealElements.forEach(element => {
+                        if (!element.classList.contains('is-visible')) {
+                            observer.observe(element);
+                        }
+                    });
+                } else {
+                    // Fallback for browsers without IntersectionObserver
+                    revealElements.forEach(element => {
+                        element.classList.add('is-visible');
+                    });
+                }
             }
         }
-    });
-    
-    document.addEventListener('turbo:load', () => {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-        document.querySelectorAll('.reveal-on-scroll').forEach(element => {
-            observer.observe(element);
-        });
-    });
+
+        // Trigger on Turbo navigations
+        document.addEventListener('turbo:load', initHomePage);
+
+        // Trigger immediately or on DOMContentLoaded for initial page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initHomePage);
+        } else {
+            initHomePage();
+        }
+    })();
 </script>

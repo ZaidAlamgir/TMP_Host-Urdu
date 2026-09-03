@@ -23,10 +23,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Checkout Main Repo (TMP_Host)
+      - name: 1. Checkout Main Repo (TMP_Host-Urdu)
         uses: actions/checkout@v4
         with:
-          repository: zaidalamgir/TMP_Host
+          repository: zaidalamgir/TMP_Host-Urdu
           token: ${{ secrets.GITHUB_TOKEN }}
           path: ./main_site
 
@@ -39,84 +39,84 @@ jobs:
       - name: 3. Checkout World Politics
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-world-politics
+          repository: TMPnews-urdu/tmp-articles-world-politics
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/world-politics
 
       - name: 4. Checkout Indian Politics
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-indian-politics
+          repository: TMPnews-urdu/tmp-articles-indian-politics
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/indian-politics
 
       - name: 5. Checkout Muslim World
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-muslim-world
+          repository: TMPnews-urdu/tmp-articles-muslim-world
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/muslim-world
 
       - name: 6. Checkout Technology
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-technology
+          repository: TMPnews-urdu/tmp-articles-technology
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/technology
 
       - name: 7. Checkout Medical Science
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-medical-science
+          repository: TMPnews-urdu/tmp-articles-medical-science
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/medical-science
 
       - name: 8. Checkout Global Economy
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-global-economy
+          repository: TMPnews-urdu/tmp-articles-global-economy
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/global-economy
 
       - name: 9. Checkout Art & Culture
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-art-culture
+          repository: TMPnews-urdu/tmp-articles-art-culture
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/art-culture
 
       - name: 10. Checkout Weather
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-weather
+          repository: TMPnews-urdu/tmp-articles-weather
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/weather
 
       - name: 11. Checkout Sports
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-sports
+          repository: TMPnews-urdu/tmp-articles-sports
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/sports
 
       - name: 12. Checkout National News
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-national-news
+          repository: TMPnews-urdu/tmp-articles-national-news
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/national-news
 
       - name: 13. Checkout International News
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-international-news
+          repository: TMPnews-urdu/tmp-articles-international-news
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/international-news
       
       - name: 14. Checkout User Archives
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-user-archives
+          repository: TMPnews-urdu/tmp-user-archives
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/user-archives
 
@@ -124,140 +124,140 @@ jobs:
       - name: 15. Checkout History
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-history
+          repository: TMPnews-urdu/tmp-articles-history
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/history
 
       - name: 16. Checkout Indian Muslims
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-indian-muslims
+          repository: TMPnews-urdu/tmp-articles-indian-muslims
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/indian-muslims
 
       - name: 17. Checkout Middle East
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-middle-east
+          repository: TMPnews-urdu/tmp-articles-middle-east
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/middle-east
 
       - name: 18. Checkout Climate
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-climate
+          repository: TMPnews-urdu/tmp-articles-climate
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/climate
 
       - name: 19. Checkout Defense
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-defense
+          repository: TMPnews-urdu/tmp-articles-defense
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/defense
 
       - name: 20. Checkout South Asia
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-south-asia
+          repository: TMPnews-urdu/tmp-articles-south-asia
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/south-asia
 
       - name: 21. Checkout Africa
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-africa
+          repository: TMPnews-urdu/tmp-articles-africa
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/africa
 
       - name: 22. Checkout Europe
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-europe
+          repository: TMPnews-urdu/tmp-articles-europe
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/europe
 
       - name: 23. Checkout Central Asia
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-central-asia
+          repository: TMPnews-urdu/tmp-articles-central-asia
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/central-asia
 
       - name: 24. Checkout Crime Alert
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-crime-alert
+          repository: TMPnews-urdu/tmp-articles-crime-alert
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/crime-alert
 
       - name: 25. Checkout South East Asia
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-south-east-asia
+          repository: TMPnews-urdu/tmp-articles-south-east-asia
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/south-east-asia
 
       - name: 26. Checkout East Asia
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-east-asia
+          repository: TMPnews-urdu/tmp-articles-east-asia
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/east-asia
 
       - name: 27. Checkout North America
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-north-america
+          repository: TMPnews-urdu/tmp-articles-north-america
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/north-america
 
       - name: 28. Checkout South America
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-south-america
+          repository: TMPnews-urdu/tmp-articles-south-america
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/south-america
 
       - name: 29. Checkout War
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-war
+          repository: TMPnews-urdu/tmp-articles-war
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/war
 
       - name: 30. Checkout Natural Disaster
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-natural-disaster
+          repository: TMPnews-urdu/tmp-articles-natural-disaster
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/natural-disaster
 
       - name: 31. Checkout Palestine
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-palestine
+          repository: TMPnews-urdu/tmp-articles-palestine
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/palestine
 
       - name: 32. Checkout Strategic Deals
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-strategic-deals
+          repository: TMPnews-urdu/tmp-articles-strategic-deals
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/strategic-deals
 
       - name: 33. Checkout Speeches & Press Conference
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-speeches-press-conference
+          repository: TMPnews-urdu/tmp-articles-speeches-press-conference
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/speeches-press-conference
 
       - name: 34. Checkout Business & Economics
         uses: actions/checkout@v4
         with:
-          repository: TheMuslimPost/tmp-articles-business-economics
+          repository: TMPnews-urdu/tmp-articles-business-economics
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/business-economics
 
@@ -379,4 +379,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }} 
           # Wrangler will automatically find the 'functions' folder in the root
           # and deploy it alongside the './_site' static assets
-          command: pages deploy ./_site --project-name=tmp-host
+          command: pages deploy ./_site --project-name=tmp-host-urdu

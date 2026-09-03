@@ -1,6 +1,6 @@
 ---
 layout: authenticated
-title: My Account - The Muslim Post
+title: My Account - The Urdu Post
 ---
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 

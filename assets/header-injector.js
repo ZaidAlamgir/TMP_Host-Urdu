@@ -58,36 +58,36 @@
     function generateCategoryDropdownHTML() {
         const categories = [
             // Original Categories
-            { name: "World Politics", tag: "world-politics" },
-            { name: "Indian Politics", tag: "indian-politics" },
-            { name: "Muslim World", tag: "muslim-world" },
-            { name: "Technology", tag: "technology" },
-            { name: "Medical Science", tag: "medical-science" },
-            { name: "Global Economy", tag: "global-economy" },
-            { name: "Art & Culture", tag: "art-culture" },
-            { name: "Weather", tag: "weather" },
-            { name: "Sports", tag: "sports" },
-            { name: "National News", tag: "national-news" },
-            { name: "International News", tag: "international-news" },
+            { name: "عالمی سیاست", tag: "world-politics" },
+            { name: "ہندوستانی سیاست", tag: "indian-politics" },
+            { name: "مسلم دنیا", tag: "muslim-world" },
+            { name: "ٹیکنالوجی", tag: "technology" },
+            { name: "طبی سائنس", tag: "medical-science" },
+            { name: "عالمی معیشت", tag: "global-economy" },
+            { name: "فن و ثقافت", tag: "art-culture" },
+            { name: "موسم", tag: "weather" },
+            { name: "کھیل", tag: "sports" },
+            { name: "قومی خبریں", tag: "national-news" },
+            { name: "بین الاقوامی", tag: "international-news" },
             // New Categories
-            { name: "History", tag: "history" },
-            { name: "Indian Muslims", tag: "indian-muslims" },
-            { name: "Middle East", tag: "middle-east" },
-            { name: "Climate", tag: "climate" },
-            { name: "Defense", tag: "defense" },
-            { name: "South Asia", tag: "south-asia" },
-            { name: "Africa", tag: "africa" },
-            { name: "Europe", tag: "europe" },
-            { name: "Central Asia", tag: "central-asia" },
-            { name: "Crime Alert", tag: "crime-alert" },
-            { name: "South East Asia", tag: "south-east-asia" },
-            { name: "East Asia", tag: "east-asia" },
-            { name: "North America", tag: "north-america" },
-            { name: "South America", tag: "south-america" }
+            { name: "تاریخ", tag: "history" },
+            { name: "ہندوستانی مسلمان", tag: "indian-muslims" },
+            { name: "مشرق وسطیٰ", tag: "middle-east" },
+            { name: "ماحولیات", tag: "climate" },
+            { name: "دفاع", tag: "defense" },
+            { name: "جنوبی ایشیا", tag: "south-asia" },
+            { name: "افریقہ", tag: "africa" },
+            { name: "یورپ", tag: "europe" },
+            { name: "وسطی ایشیا", tag: "central-asia" },
+            { name: "کرائم الرٹ", tag: "crime-alert" },
+            { name: "جنوب مشرقی ایشیا", tag: "south-east-asia" },
+            { name: "مشرقی ایشیا", tag: "east-asia" },
+            { name: "شمالی امریکہ", tag: "north-america" },
+            { name: "جنوبی امریکہ", tag: "south-america" }
         ];
         
         let dropdownHTML = `<ul class="categories-dropdown">`;
-        dropdownHTML += `<li><a href="${PATHS.NEWS_HUB}">All Categories</a></li>`;
+        dropdownHTML += `<li><a href="${PATHS.NEWS_HUB}">تمام زمرے</a></li>`;
         categories.forEach(cat => {
             dropdownHTML += `<li><a href="${PATHS.NEWS_HUB}?tag=${cat.tag}">${cat.name}</a></li>`;
         });
@@ -160,7 +160,7 @@
                 <div class="header-content">
                     <div class="header-left">
                         <button class="index-menu-button" id="index-menu-btn" title="Open Index">
-                            <svg id="index-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            <svg id="index-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                             <svg id="index-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </button>
                     </div>
@@ -172,7 +172,7 @@
                                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="tmp-text">TMP</text>
                                 <circle cx="100" cy="100" r="80" fill="none" stroke="#3498db" stroke-width="2"/>
                             </svg>
-                            <span class="logo-text">The Muslim Post</span>
+                            <span class="logo-text">The Urdu Post</span>
                         </a>
                     </div>
                     <div class="header-right">
@@ -191,24 +191,24 @@
             <div class="index-menu-overlay" id="index-menu-overlay">
                 <div class="index-menu-content">
                     <div class="search-box-container">
-                        <input type="text" id="index-search-box" class="index-search-box" placeholder="Search by tags to find articles">
+                        <input type="text" id="index-search-box" class="index-search-box" placeholder="خبریں یا ٹیگز تلاش کریں...">
                         <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
                     </div>
                     <ul id="index-results-list"></ul>
                     <div class="index-main-nav">
                         <a href="${PATHS.ROOT}" class="home-link-with-logo">
-                            <span>Home</span>
+                            <span>ہوم</span>
                             <svg class="menu-home-logo" viewBox="0 0 200 200" aria-hidden="true">
                                 <rect x="50" y="50" width="100" height="100" fill="#3498db" class="square"/>
                                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="tmp-text">TMP</text>
                                 <circle cx="100" cy="100" r="80" fill="none" stroke="#3498db" stroke-width="4"/>
                             </svg>
                         </a>
-                        <div class="nav-item-dropdown"> <span class="dropdown-toggle">Articles</span>
+                        <div class="nav-item-dropdown"> <span class="dropdown-toggle">زمرے</span>
                             ${categoryDropdown}
                         </div>
-                        <a href="${PATHS.ABOUT}">About</a>
-                        <a href="${PATHS.TERMS}">Terms & Conditions</a>
+                        <a href="${PATHS.ABOUT}">ہمارے بارے میں</a>
+                        <a href="${PATHS.TERMS}">شرائط و ضوابط</a>
                          ${settingsMenuItemHTML}
                     </div>
                 </div>
@@ -255,7 +255,7 @@
                                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="tmp-text">TMP</text>
                                 <circle cx="100" cy="100" r="80" fill="none" stroke="#3498db" stroke-width="2"/>
                             </svg>
-                            <span class="logo-text">The Muslim Post</span>
+                            <span class="logo-text">The Urdu Post</span>
                         </a>
                     </div>
                     <div class="header-right">
@@ -268,7 +268,7 @@
             <div class="index-menu-overlay" id="index-menu-overlay">
                 <div class="index-menu-content">
                     <div class="search-box-container">
-                        <input type="text" id="index-search-box" class="index-search-box" placeholder="Search by tags to find articles">
+                        <input type="text" id="index-search-box" class="index-search-box" placeholder="خبریں یا ٹیگز تلاش کریں...">
                         <span class="search-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </span>
@@ -276,18 +276,18 @@
                     <ul id="index-results-list"></ul>
                     <div class="index-main-nav">
                         <a href="${PATHS.ROOT}" class="home-link-with-logo">
-                            <span>Home</span>
+                            <span>ہوم</span>
                             <svg class="menu-home-logo" viewBox="0 0 200 200" aria-hidden="true">
                                 <rect x="50" y="50" width="100" height="100" fill="#3498db" class="square"/>
                                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="tmp-text">TMP</text>
                                 <circle cx="100" cy="100" r="80" fill="none" stroke="#3498db" stroke-width="4"/>
                             </svg>
                         </a>
-                        <div class="nav-item-dropdown"> <span class="dropdown-toggle">Articles</span>
+                        <div class="nav-item-dropdown"> <span class="dropdown-toggle">زمرے</span>
                             ${categoryDropdown}
                         </div>
-                        <a href="${PATHS.ABOUT}">About</a>
-                        <a href="${PATHS.TERMS}">Terms & Conditions</a>
+                        <a href="${PATHS.ABOUT}">ہمارے بارے میں</a>
+                        <a href="${PATHS.TERMS}">شرائط و ضوابط</a>
                         ${settingsMenuItemHTML}
                     </div>
                 </div>

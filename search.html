@@ -71,75 +71,84 @@ title: Search Results
 </div>
 
 <script>
-document.addEventListener('turbo:load', () => {
-    
-    // 1. Get the search query from the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('q');
-    
-    const searchTermEl = document.getElementById('search-term');
-    const resultsListEl = document.getElementById('search-results-list');
-    const noResultsEl = document.getElementById('no-results');
+(function() {
+    function initSearchPage() {
+        // 1. Get the search query from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        
+        const searchTermEl = document.getElementById('search-term');
+        const resultsListEl = document.getElementById('search-results-list');
+        const noResultsEl = document.getElementById('no-results');
 
-    if (!query || !searchTermEl) {
-        if(searchTermEl) searchTermEl.textContent = '""';
-        if(noResultsEl) noResultsEl.style.display = 'block';
-        return;
-    }
+        if (!searchTermEl || !resultsListEl) return;
 
-    const searchTerm = query.toLowerCase().trim();
-    searchTermEl.textContent = `"${query}"`;
+        if (!query) {
+            searchTermEl.textContent = '""';
+            if (noResultsEl) noResultsEl.style.display = 'block';
+            return;
+        }
 
-    // 2. Fetch the search.json data
-    fetch('/search.json')
-        .then(response => response.json())
-        .then(posts => {
-            
-            // 3. Filter the posts
-            const results = posts.filter(post => {
-                const title = (post.title || '').toLowerCase();
-                const tags = (post.tags || '').toLowerCase();
-                const subheadline = (post.subheadline || '').toLowerCase();
-                const content = (post.content || '').toLowerCase();
-                
-                return title.includes(searchTerm) || 
-                       tags.includes(searchTerm) ||
-                       subheadline.includes(searchTerm) ||
-                       content.includes(searchTerm);
-            });
+        const searchTerm = query.toLowerCase().trim();
+        searchTermEl.textContent = `"${query}"`;
 
-            // 4. Render the results
-            if (results.length > 0) {
-                resultsListEl.innerHTML = ''; // Clear any old results
-                noResultsEl.style.display = 'none';
-                
-                results.forEach(post => {
-                    const postDate = new Date(post.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
+        // 2. Fetch the search.json data
+        fetch('/search.json')
+            .then(response => response.json())
+            .then(posts => {
+                // 3. Filter the posts
+                const results = posts.filter(post => {
+                    const title = (post.title || '').toLowerCase();
+                    const tags = (post.tags || '').toLowerCase();
+                    const subheadline = (post.subheadline || '').toLowerCase();
+                    const content = (post.content || '').toLowerCase();
                     
-                    const li = document.createElement('li');
-                    li.className = 'result-item';
-                    li.innerHTML = `
-                        <a href="${post.url}">
-                            <h2 class="result-item-title">${post.title}</h2>
-                            <p class="result-item-snippet">${post.subheadline || post.content.substring(0, 150) + '...'}</p>
-                            <p class="result-item-date">${postDate}</p>
-                        </a>
-                    `;
-                    resultsListEl.appendChild(li);
+                    return title.includes(searchTerm) || 
+                           tags.includes(searchTerm) ||
+                           subheadline.includes(searchTerm) ||
+                           content.includes(searchTerm);
                 });
 
-            } else {
-                // 5. Handle "No Results"
-                noResultsEl.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching search data:', error);
-            resultsListEl.innerHTML = '<p style="color: red;">Could not load search results.</p>';
-        });
-});
+                // 4. Render the results
+                if (results.length > 0) {
+                    resultsListEl.innerHTML = ''; // Clear any old results
+                    if (noResultsEl) noResultsEl.style.display = 'none';
+                    
+                    results.forEach(post => {
+                        const postDate = new Date(post.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        
+                        const li = document.createElement('li');
+                        li.className = 'result-item';
+                        li.innerHTML = `
+                            <a href="${post.url}">
+                                <h2 class="result-item-title">${post.title}</h2>
+                                <p class="result-item-snippet">${post.subheadline || post.content.substring(0, 150) + '...'}</p>
+                                <p class="result-item-date">${postDate}</p>
+                            </a>
+                        `;
+                        resultsListEl.appendChild(li);
+                    });
+
+                } else {
+                    // 5. Handle "No Results"
+                    if (noResultsEl) noResultsEl.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching search data:', error);
+                if (resultsListEl) resultsListEl.innerHTML = '<p style="color: red;">Could not load search results.</p>';
+            });
+    }
+
+    document.addEventListener('turbo:load', initSearchPage);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSearchPage);
+    } else {
+        initSearchPage();
+    }
+})();
 </script>

@@ -473,11 +473,40 @@ function renderTelegramEmbeds() {
         }
         function extractLangContent(raw, lang) {
             if (!raw) return '';
-            const match = raw.match(new RegExp(`<!--${lang}-->([\\s\\S]*?)<!--\\/${lang}-->`));
-            if (match) return match[1].trim();
-            const enMatch = raw.match(/<!--en-->([\s\S]*?)<!--\/en-->/);
-            if (enMatch) return enMatch[1].trim();
-            return raw.trim();
+            const tagMap = {
+                'en': ['english', 'en'],
+                'hi': ['hindi', 'hi'],
+                'ur': ['urdu', 'ur']
+            };
+            const tags = tagMap[lang] || [lang];
+
+            // 1. Try XML-style tags like <hindi>...</hindi> or <hi>...</hi>
+            for (const t of tags) {
+                const tagRegex = new RegExp(`(?:<${t}>)([\\s\\S]*?)(?:<\\/${t}>)`, 'i');
+                const match = raw.match(tagRegex);
+                if (match && match[1].trim()) return match[1].trim();
+            }
+
+            // 2. Try HTML comments like <!--hi-->...<!--/hi-->
+            for (const t of tags) {
+                const commentRegex = new RegExp(`<!--${t}-->([\\s\\S]*?)<!--\\/${t}-->`, 'i');
+                const match = raw.match(commentRegex);
+                if (match && match[1].trim()) return match[1].trim();
+            }
+
+            // 3. For English: strip out all <hindi>, <urdu>, <!--hi-->, <!--ur--> blocks
+            if (lang === 'en') {
+                let clean = raw;
+                clean = clean.replace(/<(?:hindi|hi)>[\s\S]*?<\/(?:hindi|hi)>/gi, '');
+                clean = clean.replace(/<(?:urdu|ur)>[\s\S]*?<\/(?:urdu|ur)>/gi, '');
+                clean = clean.replace(/<!--(?:hindi|hi)-->[\s\S]*?<!--\/(?:hindi|hi)-->/gi, '');
+                clean = clean.replace(/<!--(?:urdu|ur)-->[\s\S]*?<!--\/(?:urdu|ur)-->/gi, '');
+                clean = clean.replace(/<\/?(?:english|en)>/gi, '');
+                clean = clean.replace(/<!--\/?(?:english|en)-->/gi, '');
+                return clean.trim();
+            }
+
+            return '';
         }
 
         function renderPost(postData, container, insertAtTop = false) {

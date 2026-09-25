@@ -18,8 +18,20 @@
     
     <!-- Google AdSense Verification & Ads -->
     <meta name="google-adsense-account" content="ca-pub-4850323427784993">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4850323427784993"
-         crossorigin="anonymous"></script>
+    <script>
+        (function() {
+            var isApp = window.location.search.includes('app=true') || 
+                        (typeof window.AndroidInterface !== 'undefined') ||
+                        (window.parent !== window);
+            if (!isApp) {
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4850323427784993";
+                s.crossOrigin = "anonymous";
+                document.head.appendChild(s);
+            }
+        })();
+    </script>
     
     {% if page.url == "/" or page.url == "/index.html" %}
     <script type="application/ld+json">
@@ -107,8 +119,13 @@
                 if (typeof window.AndroidInterface !== 'undefined') {
                     document.documentElement.classList.add('is-android-app');
                 }
-                if (window.location.search.includes('app=true')) {
+                if (window.location.search.includes('app=true') || window.parent !== window) {
                     document.documentElement.classList.add('is-embed-app');
+                    document.addEventListener('DOMContentLoaded', function() {
+                        try {
+                            window.parent.postMessage({ type: 'TMP_ARTICLE_LOADED' }, '*');
+                        } catch (e) {}
+                    });
                 }
                 
                 const isDarkMode = window.AndroidInterface.getDarkModeStatus() === 'true';

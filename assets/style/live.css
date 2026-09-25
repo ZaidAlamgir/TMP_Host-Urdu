@@ -225,8 +225,7 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color
 .loader { display: block; width: 40px; height: 40px; margin: 2rem auto; border: 4px solid var(--border-color); border-top-color: var(--bbc-red); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .app-only-feature { display: none !important; }
-body.android-app-view .app-only-feature { display: flex !important; }
-.live-translation-controls { gap: 8px; margin-top: 1.5rem; margin-bottom: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+.live-translation-controls { display: none !important; }
 .translate-chip-btn { background-color: transparent; border: 1px solid #166534; color: #166534; border-radius: 0; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .translate-chip-btn.hindi { border-color: #1e40af; color: #1e40af; }
 .translated-text-block { background-color: var(--bg-page); border-left: 4px solid #1e40af; padding: 1.25rem; margin: 1rem 0; font-size: 1.05rem; color: var(--text-body); }

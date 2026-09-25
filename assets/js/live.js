@@ -231,9 +231,17 @@
         const noMorePostsMsg = document.getElementById('no-more-posts-msg');
         const INITIAL_LOAD_COUNT = 80; 
         const SUBSEQUENT_LOAD_COUNT = 80;
-        const CACHE_KEY = 'cachedLiveFeed';
-        const PREFETCH_KEY = 'prefetchedLiveFeed';
-        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp';
+        try {
+            sessionStorage.removeItem('cachedLiveFeed');
+            sessionStorage.removeItem('cachedLiveFeed_ur_v2');
+            localStorage.removeItem('prefetchedLiveFeed');
+            localStorage.removeItem('prefetchedLiveFeed_ur_v2');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v2');
+        } catch (e) {}
+        const CACHE_KEY = 'cachedLiveFeed_ur_v3';
+        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v3';
+        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v3';
         let allPosts = []; 
         let loadedPostsCount = 0;
         const viewedPosts = new Set(safeJSONParse(sessionStorage.getItem('viewedLivePosts'), []));
@@ -471,70 +479,111 @@ function renderTelegramEmbeds() {
                 .then(() => console.log(`View logged for ${postId}`))
                 .catch(error => { console.error("View log failed:", error); viewedPosts.delete(postId); sessionStorage.setItem('viewedLivePosts', JSON.stringify(Array.from(viewedPosts))); });
         }
-        function extractLangContent(raw, lang) {
+        function extractLangContent(raw, lang = 'ur') {
             if (!raw) return '';
             const tagMap = {
-                'en': ['english', 'en'],
+                'ur': ['urdu', 'ur'],
                 'hi': ['hindi', 'hi'],
-                'ur': ['urdu', 'ur']
+                'en': ['english', 'en']
             };
             const tags = tagMap[lang] || [lang];
 
-            // 1. Try XML-style tags like <hindi>...</hindi> or <hi>...</hi>
+            // 1. Try XML-style tags like <urdu>...</urdu> or <ur>...</ur>
             for (const t of tags) {
-                const tagRegex = new RegExp(`(?:<${t}>)([\\s\\S]*?)(?:<\\/${t}>)`, 'i');
+                const tagRegex = new RegExp(`(?:<${t}[^>]*>)([\\s\\S]*?)(?:<\\/${t}>|(?=<(?:hindi|hi|urdu|ur|english|en)|<!--|$))`, 'i');
                 const match = raw.match(tagRegex);
-                if (match && match[1].trim()) return match[1].trim();
+                if (match && match[1].trim()) {
+                    let clean = match[1].trim();
+                    clean = clean.replace(/<(?:hindi|hi|english|en)[^>]*>[\s\S]*?<\/(?:hindi|hi|english|en)>/gi, '');
+                    clean = clean.replace(/<!--(?:hindi|hi|english|en)-->[\s\S]*?<!--\/(?:hindi|hi|english|en)-->/gi, '');
+                    clean = clean.replace(/<\/?(?:hindi|hi|urdu|ur|english|en)[^>]*>/gi, '');
+                    clean = clean.replace(/<!--\/?(?:hindi|hi|urdu|ur|english|en)-->/gi, '');
+                    return clean.trim();
+                }
             }
 
-            // 2. Try HTML comments like <!--hi-->...<!--/hi-->
+            // 2. Try HTML comments like <!--ur-->...<!--/ur-->
             for (const t of tags) {
                 const commentRegex = new RegExp(`<!--${t}-->([\\s\\S]*?)<!--\\/${t}-->`, 'i');
                 const match = raw.match(commentRegex);
-                if (match && match[1].trim()) return match[1].trim();
+                if (match && match[1].trim()) {
+                    let clean = match[1].trim();
+                    clean = clean.replace(/<(?:hindi|hi|english|en)[^>]*>[\s\S]*?<\/(?:hindi|hi|english|en)>/gi, '');
+                    clean = clean.replace(/<!--(?:hindi|hi|english|en)-->[\s\S]*?<!--\/(?:hindi|hi|english|en)-->/gi, '');
+                    clean = clean.replace(/<\/?(?:hindi|hi|urdu|ur|english|en)[^>]*>/gi, '');
+                    clean = clean.replace(/<!--\/?(?:hindi|hi|urdu|ur|english|en)-->/gi, '');
+                    return clean.trim();
+                }
             }
 
-            // 3. For English: strip out all <hindi>, <urdu>, <!--hi-->, <!--ur--> blocks
+            // 3. For English ONLY (when requested explicitly):
             if (lang === 'en') {
                 let clean = raw;
-                clean = clean.replace(/<(?:hindi|hi)>[\s\S]*?<\/(?:hindi|hi)>/gi, '');
-                clean = clean.replace(/<(?:urdu|ur)>[\s\S]*?<\/(?:urdu|ur)>/gi, '');
-                clean = clean.replace(/<!--(?:hindi|hi)-->[\s\S]*?<!--\/(?:hindi|hi)-->/gi, '');
-                clean = clean.replace(/<!--(?:urdu|ur)-->[\s\S]*?<!--\/(?:urdu|ur)-->/gi, '');
+                clean = clean.replace(/<(?:hindi|hi|urdu|ur)[^>]*>[\s\S]*?<\/(?:hindi|hi|urdu|ur)>/gi, '');
+                clean = clean.replace(/<!--(?:hindi|hi|urdu|ur)-->[\s\S]*?<!--\/(?:hindi|hi|urdu|ur)-->/gi, '');
                 clean = clean.replace(/<\/?(?:english|en)>/gi, '');
                 clean = clean.replace(/<!--\/?(?:english|en)-->/gi, '');
                 return clean.trim();
             }
 
+            // For Urdu: if no translation block exists, NEVER leak raw text or English/Hindi!
             return '';
         }
 
+        function hasUrduTranslation(postData) {
+            if (!postData) return false;
+            const urHeadline = extractLangContent(postData.headline, 'ur');
+            const urContent = extractLangContent(postData.content, 'ur');
+
+            const cleanHeadline = (urHeadline || '').replace(/<[^>]*>/g, '').trim();
+            const cleanContent = (urContent || '').replace(/<[^>]*>/g, '').trim();
+
+            const arabicUrdu = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
+            const hasUrdu = arabicUrdu.test(cleanHeadline) || arabicUrdu.test(cleanContent);
+
+            return Boolean(hasUrdu);
+        }
+
         function renderPost(postData, container, insertAtTop = false) {
+            // STRICT RULE: If the post does not contain an Urdu translation, completely hide it
+            if (!hasUrduTranslation(postData)) {
+                return;
+            }
+
+            const postHeadline = extractLangContent(postData.headline, 'ur');
+            const postContent = extractLangContent(postData.content, 'ur');
+
+            if (!postHeadline && !postContent) {
+                return;
+            }
+
             const postElement = document.createElement('div');
             postElement.className = 'live-post';
             postElement.id = `post-${postData.id}`; 
             if (insertAtTop) postElement.classList.add('new-post-animation');
             if (postData.is_pinned) postElement.classList.add('is-pinned');
-            const postHeadline = extractLangContent(postData.headline, 'ur');
-            const postContent = extractLangContent(postData.content, 'ur');
+
             let tagsHTML = postData.tags?.length > 0 ? '<div class="tags-container">' + postData.tags.map(tag => `<a href="#" class="tag-badge">#${tag}</a>`).join('') + '</div>' : '';
-            let pinnedBadgeHTML = postData.is_pinned ? `<span class="pinned-badge"><i class="fas fa-thumbtack fa-xs"></i><span class="ml-1.5">PINNED</span></span>` : '';
+            let pinnedBadgeHTML = postData.is_pinned ? `<span class="pinned-badge"><i class="fas fa-thumbtack fa-xs"></i><span class="ml-1.5">پِن شدہ</span></span>` : '';
             const logoSVG = `<svg class="post-author-logo" viewBox="0 0 200 200" aria-hidden="true"><rect x="50" y="50" width="100" height="100" class="square"/><circle cx="100" cy="100" r="80" fill="none" stroke-width="8" class="static-circle"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" class="tmp-text">TMP</text></svg>`;
             const formattedDate = new Date(postData.timestamp).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
             const initialViewCount = postData.view_count || 0;
             const initialLikeCount = postData.like_count || 0;
-            const progressBarHTML = `<div class="processing-text">Downloading model & translating...</div><div class="translation-progress-container"><div class="translation-progress-bar"></div></div>`;
-            const translationButtonsHTML = `<div class="live-translation-controls app-only-feature"><button class="translate-chip-btn hindi" onclick="requestLivePostTranslation('${postData.id}', 'hi')">Hindi</button><button class="translate-chip-btn" onclick="requestLivePostTranslation('${postData.id}', 'ur')">Urdu</button></div>`;
+
             const isAlreadyLiked = likedPosts.has(String(postData.id));
             const likeBtnClass = isAlreadyLiked ? "like-btn is-liked" : "like-btn";
+
+            const headlineHTML = postHeadline ? `<h2 class="live-post-headline">${postHeadline}</h2>` : '';
+            const bodyHTML = postContent ? `<div class="post-body">${parseContent(postContent)}</div>` : '';
+
             postElement.innerHTML = `<div class="live-post-content">
                 <div class="live-post-meta">
                     <div class="live-post-author-group">${logoSVG}<span class="live-post-author">${postData.author_name}</span></div>
                     <span class="live-post-time">${formattedDate}</span>${pinnedBadgeHTML}
                 </div>
-                <h2 class="live-post-headline">${postHeadline || ''}</h2>
-                <div class="post-body">${parseContent(postContent)}</div>
-                ${tagsHTML}${progressBarHTML}${translationButtonsHTML}
+                ${headlineHTML}
+                ${bodyHTML}
+                ${tagsHTML}
                 <div class="post-footer">
                     <div class="post-stats" data-post-id="${postData.id}">
                         <button class="${likeBtnClass}" data-post-id="${postData.id}" title="Like">
@@ -543,7 +592,7 @@ function renderTelegramEmbeds() {
                         <span id="like-count-${postData.id}" class="like-count" style="margin-left:0.5rem;">${initialLikeCount}</span>
                         <div class="stat-item" style="margin-left: 1rem;"><i class="fas fa-eye" style="color:var(--text-muted);"></i><span id="view-count-${postData.id}" style="margin-left:0.5rem;">${initialViewCount}</span></div>
                     </div>
-                    <button class="share-btn" data-post-id="${postData.id}" data-post-headline="${postHeadline || 'Live Update'}"><i class="fas fa-share-alt mr-2"></i>Share</button>
+                    <button class="share-btn" data-post-id="${postData.id}" data-post-headline="${postHeadline || 'Live Update'}"><i class="fas fa-share-alt mr-2"></i>شیئر</button>
                 </div>
             </div>`;
             if (insertAtTop) { container.prepend(postElement); } else { container.appendChild(postElement); }
@@ -559,6 +608,7 @@ function renderTelegramEmbeds() {
                 }
             }, 100);
         }
+
         async function fetchFullFeed(forceCacheBypass = false) {
              const prefetchedData = localStorage.getItem(PREFETCH_KEY);
              if (prefetchedData) {
@@ -566,8 +616,8 @@ function renderTelegramEmbeds() {
                 localStorage.removeItem(PREFETCH_TIMESTAMP_KEY);
                 const parsed = safeJSONParse(prefetchedData, null);
                 if (Array.isArray(parsed)) {
-                    allPosts = parsed;
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
+                    allPosts = parsed.filter(p => hasUrduTranslation(p));
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
                     return allPosts;
                 }
              }
@@ -575,7 +625,7 @@ function renderTelegramEmbeds() {
                  const cachedData = sessionStorage.getItem(CACHE_KEY); 
                  const parsed = safeJSONParse(cachedData, null);
                  if (Array.isArray(parsed)) {
-                    allPosts = parsed;
+                    allPosts = parsed.filter(p => hasUrduTranslation(p));
                     return allPosts;
                  }
              }
@@ -586,13 +636,14 @@ function renderTelegramEmbeds() {
                  const data = await response.json();
                  if (!Array.isArray(data)) throw new Error("API did not return an array.");
                  sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); 
-                 allPosts = data;
+                 allPosts = data.filter(p => hasUrduTranslation(p));
                  return allPosts;
              } catch (error) { 
                  console.error('Error fetching feed:', error); 
                  return []; 
              }
         }
+
         async function loadMorePosts(isFullRefresh = false) {
              const loadMoreBtn = document.getElementById('load-more-btn');
              if (!loadMoreBtn) return;
@@ -605,22 +656,23 @@ function renderTelegramEmbeds() {
                 loadedPostsCount = 0;
              }
              loadMoreBtn.disabled = true;
-             loadMoreBtn.textContent = 'Loading...';
+             loadMoreBtn.textContent = 'لوڈ ہو رہا ہے...';
              if (allPosts.length === 0 || isFullRefresh) {
                  const fullFeed = await fetchFullFeed(isFullRefresh);
-                 if (fullFeed.length === 0) {
+                 const urduFeed = fullFeed.filter(p => hasUrduTranslation(p));
+                 if (urduFeed.length === 0) {
                     liveFeed.innerHTML = '';
                     loadMoreBtn.style.display = 'none'; 
-                    noMorePostsMsg.textContent = "No updates have been posted yet."; 
+                    noMorePostsMsg.textContent = "فی الحال کوئی لائیو اپڈیٹ دستیاب نہیں ہے۔"; 
                     noMorePostsMsg.style.display = 'block';
                     return;
                  }
-                 const pinned = fullFeed.find(p => p.is_pinned);
+                 const pinned = urduFeed.find(p => p.is_pinned);
                  if (pinned && (isFullRefresh || pinnedPostContainer.innerHTML.trim() === '')) {
                      pinnedPostContainer.innerHTML = '';
                      renderPost(pinned, pinnedPostContainer, false);
                  }
-                 allPosts = fullFeed.filter(p => !p.is_pinned); 
+                 allPosts = urduFeed.filter(p => !p.is_pinned); 
              }
             if (loadedPostsCount === 0 && liveFeed.innerHTML.includes('loader')) {
                 liveFeed.innerHTML = ''; 
@@ -648,7 +700,7 @@ function renderTelegramEmbeds() {
                 loadMoreBtn.style.display = 'none'; archiveBtn.style.display = 'inline-block'; noMorePostsMsg.style.display = 'block';
             } else {
                 loadMoreBtn.disabled = false; 
-                loadMoreBtn.textContent = 'Load Previous Updates'; 
+                loadMoreBtn.textContent = 'پچھلی اپڈیٹس لوڈ کریں'; 
                 loadMoreBtn.style.display = 'inline-block'; 
                 archiveBtn.style.display = 'none'; 
                 noMorePostsMsg.style.display = 'none';
@@ -667,37 +719,48 @@ function renderTelegramEmbeds() {
                     const newPostData = payload.new;
                     
                     if (payload.eventType === 'INSERT') {
-                        if (!newPostData.is_pinned) {
-                            renderPost(newPostData, liveFeed, true); 
-                            allPosts.unshift(newPostData);
-                            loadedPostsCount++;
-                            
-                            setTimeout(loadSocialScripts, 200); 
-                            
-                        } else { 
-                            loadMorePosts(true); 
+                        if (hasUrduTranslation(newPostData)) {
+                            if (!newPostData.is_pinned) {
+                                renderPost(newPostData, liveFeed, true); 
+                                allPosts.unshift(newPostData);
+                                loadedPostsCount++;
+                                setTimeout(loadSocialScripts, 200); 
+                            } else { 
+                                loadMorePosts(true); 
+                            }
                         }
                     } 
                     else if (payload.eventType === 'UPDATE') {
                         const existingElement = document.getElementById(`post-${newPostData.id}`);
-                        
-                        const currentIsPinned = existingElement ? existingElement.classList.contains('is-pinned') : false;
-                        const newIsPinned = newPostData.is_pinned;
+                        if (!hasUrduTranslation(newPostData)) {
+                            if (existingElement) existingElement.remove();
+                            allPosts = allPosts.filter(p => p.id !== newPostData.id);
+                        } else {
+                            const currentIsPinned = existingElement ? existingElement.classList.contains('is-pinned') : false;
+                            const newIsPinned = newPostData.is_pinned;
 
-                        if (existingElement && newIsPinned !== currentIsPinned) { 
-                            loadMorePosts(true); 
-                        }
-                        else if (existingElement) {
-                            const likeCountSpan = existingElement.querySelector(`#like-count-${newPostData.id}`);
-                            const viewCountSpan = existingElement.querySelector(`#view-count-${newPostData.id}`);
-                            
-                            if (likeCountSpan) {
-                                const currentLikes = parseInt(likeCountSpan.textContent.replace(/,/g, '')) || 0;
-                                animateCountUp(likeCountSpan, currentLikes, newPostData.like_count);
+                            if (!existingElement || (newIsPinned !== currentIsPinned)) { 
+                                loadMorePosts(true); 
                             }
-                            if (viewCountSpan) {
-                                const currentViews = parseInt(viewCountSpan.textContent.replace(/,/g, '')) || 0;
-                                animateCountUp(viewCountSpan, currentViews, newPostData.view_count);
+                            else if (existingElement) {
+                                const hlEl = existingElement.querySelector('.live-post-headline');
+                                const bodyEl = existingElement.querySelector('.post-body');
+                                const newHl = extractLangContent(newPostData.headline, 'ur');
+                                const newCnt = extractLangContent(newPostData.content, 'ur');
+                                if (hlEl) hlEl.textContent = newHl || '';
+                                if (bodyEl) bodyEl.innerHTML = parseContent(newCnt || '');
+
+                                const likeCountSpan = existingElement.querySelector(`#like-count-${newPostData.id}`);
+                                const viewCountSpan = existingElement.querySelector(`#view-count-${newPostData.id}`);
+                                
+                                if (likeCountSpan) {
+                                    const currentLikes = parseInt(likeCountSpan.textContent.replace(/,/g, '')) || 0;
+                                    animateCountUp(likeCountSpan, currentLikes, newPostData.like_count);
+                                }
+                                if (viewCountSpan) {
+                                    const currentViews = parseInt(viewCountSpan.textContent.replace(/,/g, '')) || 0;
+                                    animateCountUp(viewCountSpan, currentViews, newPostData.view_count);
+                                }
                             }
                         }
                     }
@@ -719,21 +782,22 @@ function renderTelegramEmbeds() {
             if (cachedData) { 
                 const fullFeed = safeJSONParse(cachedData, []);
                 const loadMoreBtn = document.getElementById('load-more-btn');
-                allPosts = fullFeed.filter(p => !p.is_pinned); 
+                allPosts = fullFeed.filter(p => !p.is_pinned && hasUrduTranslation(p)); 
                 
                 if (allPosts.length > 0 && totalPostsOnScreen >= allPosts.length) {
                      if(loadMoreBtn) loadMoreBtn.style.display = 'none'; archiveBtn.style.display = 'inline-block'; noMorePostsMsg.style.display = 'block';
                 } else {
-                     if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'Load Previous Updates'; }
+                     if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'پچھلی اپڈیٹس لوڈ کریں'; }
                 }
             } else {
                 fetchFullFeed(false).then((data) => {
                      const loadMoreBtn = document.getElementById('load-more-btn');
-                     const feedCount = data.length - (data.find(p=>p.is_pinned)?1:0);
+                     const urduPosts = data.filter(p => hasUrduTranslation(p));
+                     const feedCount = urduPosts.length - (urduPosts.find(p=>p.is_pinned)?1:0);
                      if (totalPostsOnScreen >= feedCount) {
                         if(loadMoreBtn) loadMoreBtn.style.display = 'none'; archiveBtn.style.display = 'inline-block'; noMorePostsMsg.style.display = 'block';
                      } else {
-                        if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'Load Previous Updates'; }
+                        if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'پچھلی اپڈیٹس لوڈ کریں'; }
                      }
                 });
             }

@@ -234,14 +234,20 @@
         try {
             sessionStorage.removeItem('cachedLiveFeed');
             sessionStorage.removeItem('cachedLiveFeed_ur_v2');
+            sessionStorage.removeItem('cachedLiveFeed_ur_v3');
             localStorage.removeItem('prefetchedLiveFeed');
             localStorage.removeItem('prefetchedLiveFeed_ur_v2');
+            localStorage.removeItem('prefetchedLiveFeed_ur_v3');
+            localStorage.removeItem('prefetchedLiveFeed_ur_v4');
             localStorage.removeItem('prefetchedLiveFeedTimestamp');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v2');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v3');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v4');
         } catch (e) {}
-        const CACHE_KEY = 'cachedLiveFeed_ur_v3';
-        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v3';
-        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v3';
+        sessionStorage.removeItem('cachedLiveFeed_ur_v4');
+        const CACHE_KEY = 'cachedLiveFeed_ur_v5';
+        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v5';
+        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v5';
         let allPosts = []; 
         let loadedPostsCount = 0;
         const viewedPosts = new Set(safeJSONParse(sessionStorage.getItem('viewedLivePosts'), []));
@@ -310,7 +316,8 @@
 
             // 1. --- NEW HTML PROTECTION PASS ---
             const htmlBlocks = [
-                /<div class="embed-container">[\s\S]*?<\/div>\n<\/div>/gi,
+                /<div class="embed-container">[\s\S]*?<\/div>\s*<\/div>/gi,
+                /<div class="telegram-embed-placeholder"[^>]*>[\s\S]*?<\/div>/gi,
                 /<div class="table-container[^>]*>[\s\S]*?<\/table><\/div>/gi,
                 /<a href="[^"]+" class="button"[^>]*>[\s\S]*?<\/a>/gi
             ];
@@ -320,7 +327,7 @@
                     let styledMatch = match
                         .replace(/<div class="embed-container">/gi, '<div class="my-4" style="display: flex; flex-direction: column; align-items: center; width: 100%;">')
                         .replace(/<div class="embed-caption">/gi, '<p class="media-caption" style="width: 100%;">')
-                        .replace(/<\/div>\n<\/div>/gi, '</p></div>') 
+                        .replace(/<\/div>\s*<\/div>/gi, '</p></div>') 
                         .replace(/class="button"/gi, 'class="professional-btn" style="display: inline-block; text-decoration: none; width: auto; min-width: 200px; margin: 1.5rem 0;"');
                     
                     placeholders.push(styledMatch);
@@ -368,7 +375,12 @@
                         case 'tiktok': htmlBlock = `<div class="my-4"><blockquote class="tiktok-embed" cite="${url}" data-embed-from="embed_page"> <section></section> </blockquote>${caption}</div>`; break;
                         case 'linkedin': htmlBlock = `<div class="my-4"><div class="linkedin-post" data-href="${url}"></div>${caption}</div>`; break;
                         case 'reddit': htmlBlock = `<div class="my-4"><blockquote class="reddit-embed-bq" data-embed-height="500"><a href="${url}">Post</a></blockquote>${caption}</div>`; break;
-                        case 'telegram': const tgMatch = url.match(/t\.me\/([a-zA-Z0-9_]+\/\d+)/); if (tgMatch && tgMatch[1]) { htmlBlock = `<div class="my-4"><blockquote class="telegram-post" data-post="${tgMatch[1]}" data-width="100%"></blockquote>${caption}`; } break;
+                        case 'telegram': 
+                            const tgMatch = url.match(/t\.me\/([a-zA-Z0-9_]+\/\d+)/); 
+                            if (tgMatch && tgMatch[1]) { 
+                                htmlBlock = `<div class="my-4" style="display: flex; flex-direction: column; align-items: center; width: 100%;"><div class="telegram-embed-placeholder" data-tg-post="${tgMatch[1]}"></div>${caption}</div>`; 
+                            } 
+                            break;
                     }
                 }
                 placeholders.push(htmlBlock);
@@ -394,38 +406,65 @@
             return processedText.replace(/__PLACEHOLDER_(\d+)__/g, (match, index) => placeholders[parseInt(index, 10)]);
         }
 
-        // Function to find placeholders and inject the Telegram widget
-function renderTelegramEmbeds() {
-    // Find all the placeholders your CMS created
-    const placeholders = document.querySelectorAll('.telegram-embed-placeholder');
-    
-    placeholders.forEach(container => {
-        // Skip if we already rendered this one
-        if (container.dataset.rendered) return; 
-        
-        const tgPostPath = container.getAttribute('data-tg-post');
-        
-        if (tgPostPath) {
-            // Create the official Telegram script dynamically
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = "https://telegram.org/js/telegram-widget.js?22";
-            script.setAttribute('data-telegram-post', tgPostPath);
-            script.setAttribute('data-width', '100%'); 
+        // Function to find placeholders and inject the Telegram widget / responsive embed
+        function renderTelegramEmbeds() {
+            const placeholders = document.querySelectorAll('.telegram-embed-placeholder');
             
-            // Inject it into the placeholder
-            container.appendChild(script);
-            
-            // Mark as rendered so it doesn't duplicate
-            container.dataset.rendered = "true"; 
+            placeholders.forEach(container => {
+                if (container.dataset.rendered) return; 
+                
+                const tgPostPath = container.getAttribute('data-tg-post');
+                if (tgPostPath) {
+                    container.dataset.rendered = "true"; 
+                    const cleanPath = tgPostPath.replace(/^https?:\/\/(?:t\.me|telegram\.dog|telegram\.me)\//, '').replace(/^\/+/, '');
+                    
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://telegram.dog/${cleanPath}?embed=1&userpic=true`;
+                    iframe.width = "100%";
+                    iframe.height = "420";
+                    iframe.frameBorder = "0";
+                    iframe.scrolling = "no";
+                    iframe.style.border = "none";
+                    iframe.style.overflow = "hidden";
+                    iframe.style.width = "100%";
+                    iframe.style.minHeight = "280px";
+                    iframe.style.maxWidth = "550px";
+                    iframe.style.margin = "0 auto";
+                    iframe.style.display = "block";
+                    iframe.style.borderRadius = "8px";
+                    iframe.setAttribute('allowtransparency', 'true');
+                    iframe.setAttribute('allowfullscreen', 'true');
+                    
+                    const fallbackDiv = document.createElement('div');
+                    fallbackDiv.className = 'telegram-embed-footer';
+                    fallbackDiv.style.cssText = 'text-align: center; margin-top: 6px; font-size: 13px; width: 100%;';
+                    fallbackDiv.innerHTML = `<a href="https://t.me/${cleanPath}" target="_blank" rel="noopener noreferrer" style="color: #229ED9; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg> Open in Telegram</a>`;
+
+                    container.style.cssText = 'width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 12px auto;';
+                    container.innerHTML = '';
+                    container.appendChild(iframe);
+                    container.appendChild(fallbackDiv);
+                }
+            });
         }
-    });
-}
-// EXAMPLE of where to put it:
-// fetchLiveUpdatesFromSupabase().then(data => {
-//    document.getElementById('live-feed-container').innerHTML = data.html;
-//    renderTelegramEmbeds(); // <--- Call it right after DOM updates
-// });
+
+        if (!window._telegramResizeListenerAdded) {
+            window._telegramResizeListenerAdded = true;
+            window.addEventListener('message', function(event) {
+                if (!event.data || (typeof event.origin === 'string' && !event.origin.includes('telegram') && !event.origin.includes('t.me'))) return;
+                try {
+                    const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                    if (data && data.event === 'resize' && data.height) {
+                        const iframes = document.querySelectorAll('.telegram-embed-placeholder iframe');
+                        iframes.forEach(f => {
+                            if (f.contentWindow === event.source) {
+                                f.style.height = data.height + 'px';
+                            }
+                        });
+                    }
+                } catch (e) {}
+            });
+        }
 
         function loadSocialScripts() {
             const scripts = { instagram: '//www.instagram.com/embed.js', facebook: 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0', tiktok: 'https://www.tiktok.com/embed.js', reddit: 'https://embed.reddit.com/widgets.js', telegram: 'https://telegram.org/js/telegram-widget.js?22', linkedin: 'https://platform.linkedin.com/Voyager/js/posts/embed.js' };
@@ -526,6 +565,17 @@ function renderTelegramEmbeds() {
                 return clean.trim();
             }
 
+            // Fallback for standalone media embeds (like Telegram, images, videos) that have no text story to translate
+            const hasMediaTag = /telegram-embed-placeholder|data-tg-post|<img|twitter-tweet|iframe/i.test(raw);
+            const hasExplicitOtherLang = /<(?:hindi|hi)>|<!--(?:hindi|hi)-->/i.test(raw);
+            const textOnly = raw.replace(/<[^>]*>/g, '').trim();
+            // If it is pure media without explicit Hindi block and without long English body text (< 60 chars, e.g. generic caption)
+            if (hasMediaTag && !hasExplicitOtherLang && textOnly.length < 60) {
+                let clean = raw.replace(/<(?:hindi|hi|english|en)[^>]*>[\s\S]*?<\/(?:hindi|hi|english|en)>/gi, '');
+                clean = clean.replace(/<!--(?:hindi|hi|english|en)-->[\s\S]*?<!--\/(?:hindi|hi|english|en)-->/gi, '');
+                return clean.trim();
+            }
+
             // For Urdu: if no translation block exists, NEVER leak raw text or English/Hindi!
             return '';
         }
@@ -538,10 +588,26 @@ function renderTelegramEmbeds() {
             const cleanHeadline = (urHeadline || '').replace(/<[^>]*>/g, '').trim();
             const cleanContent = (urContent || '').replace(/<[^>]*>/g, '').trim();
 
+            const devanagari = /[\u0900-\u097F]/;
             const arabicUrdu = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
-            const hasUrdu = arabicUrdu.test(cleanHeadline) || arabicUrdu.test(cleanContent);
+            const textOnly = (cleanHeadline + ' ' + cleanContent).trim();
 
-            return Boolean(hasUrdu);
+            // Strictly exclude if visible text has Hindi Devanagari script and NO Urdu
+            if (devanagari.test(textOnly) && !arabicUrdu.test(textOnly)) {
+                return false;
+            }
+
+            const hasUrdu = arabicUrdu.test(cleanHeadline) || arabicUrdu.test(cleanContent);
+            const hasMedia = Boolean(urContent && (
+                urContent.includes('<img') || 
+                urContent.includes('telegram-embed-placeholder') || 
+                urContent.includes('data-tg-post') || 
+                urContent.includes('telegram') || 
+                urContent.includes('twitter') || 
+                urContent.includes('iframe')
+            ));
+
+            return Boolean(hasUrdu || hasMedia);
         }
 
         function renderPost(postData, container, insertAtTop = false) {
@@ -596,6 +662,7 @@ function renderTelegramEmbeds() {
                 </div>
             </div>`;
             if (insertAtTop) { container.prepend(postElement); } else { container.appendChild(postElement); }
+            renderTelegramEmbeds();
             incrementViewCount(postData.id);
             setTimeout(() => { 
                 const likeCountSpan = document.getElementById(`like-count-${postData.id}`);

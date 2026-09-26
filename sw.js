@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v29';
-const ARTICLE_CACHE = 'tmp-articles-v29';
-const ASSET_CACHE = 'tmp-assets-v29';
+const CORE_CACHE = 'tmp-core-v31';
+const ARTICLE_CACHE = 'tmp-articles-v31';
+const ASSET_CACHE = 'tmp-assets-v31';
 const CORE_ASSETS = [
     '/',                      
     '/index.html',            
@@ -71,6 +71,8 @@ self.addEventListener('fetch', (event) => {
     const url = new URL(request.url);
 
     if (
+        url.hostname === 'localhost' ||
+        url.hostname === '127.0.0.1' ||
         url.pathname.includes('ORGcms.html') ||
         url.pathname.includes('liveCMS.html') ||
         url.origin.includes('supabase.co') || 

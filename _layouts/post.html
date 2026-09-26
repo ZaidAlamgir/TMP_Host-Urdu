@@ -434,13 +434,35 @@ layout: default
 function renderTelegramEmbeds() {
     const injectWidget = (container, path) => {
         if (container.dataset.rendered) return; 
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        script.setAttribute('data-telegram-post', path);
-        script.setAttribute('data-width', '100%'); 
-        container.appendChild(script);
         container.dataset.rendered = "true"; 
+        const cleanPath = path.replace(/^https?:\/\/(?:t\.me|telegram\.dog|telegram\.me)\//, '').replace(/^\/+/, '');
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://telegram.dog/${cleanPath}?embed=1&userpic=true`;
+        iframe.width = "100%";
+        iframe.height = "420";
+        iframe.frameBorder = "0";
+        iframe.scrolling = "no";
+        iframe.style.border = "none";
+        iframe.style.overflow = "hidden";
+        iframe.style.width = "100%";
+        iframe.style.minHeight = "280px";
+        iframe.style.maxWidth = "550px";
+        iframe.style.margin = "0 auto";
+        iframe.style.display = "block";
+        iframe.style.borderRadius = "8px";
+        iframe.setAttribute('allowtransparency', 'true');
+        iframe.setAttribute('allowfullscreen', 'true');
+        
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.className = 'telegram-embed-footer';
+        fallbackDiv.style.cssText = 'text-align: center; margin-top: 6px; font-size: 13px; width: 100%;';
+        fallbackDiv.innerHTML = `<a href="https://t.me/${cleanPath}" target="_blank" rel="noopener noreferrer" style="color: #229ED9; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg> Open in Telegram</a>`;
+
+        container.style.cssText = 'width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 12px auto;';
+        container.innerHTML = '';
+        container.appendChild(iframe);
+        container.appendChild(fallbackDiv);
     };
 
     document.querySelectorAll('.telegram-embed-placeholder').forEach(container => {
@@ -480,6 +502,24 @@ function renderTelegramEmbeds() {
 
             injectWidget(placeholder, tgPath);
         }
+    });
+}
+
+if (!window._telegramResizeListenerAdded) {
+    window._telegramResizeListenerAdded = true;
+    window.addEventListener('message', function(event) {
+        if (!event.data || (typeof event.origin === 'string' && !event.origin.includes('telegram') && !event.origin.includes('t.me'))) return;
+        try {
+            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+            if (data && data.event === 'resize' && data.height) {
+                const iframes = document.querySelectorAll('.telegram-embed-placeholder iframe');
+                iframes.forEach(f => {
+                    if (f.contentWindow === event.source) {
+                        f.style.height = data.height + 'px';
+                    }
+                });
+            }
+        } catch (e) {}
     });
 }
 

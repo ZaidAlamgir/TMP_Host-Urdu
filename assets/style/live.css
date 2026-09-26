@@ -341,14 +341,36 @@ body { font-family: 'Inter', sans-serif; background-color: var(--bg-page); color
 /* Telegram Embed Styling */
 .telegram-embed-placeholder {
     width: 100%;
+    max-width: 550px;
     min-height: 100px; /* Prevents layout shift while loading */
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin: 10px 0;
+    margin: 14px auto;
+    text-align: center;
 }
 
-/* Optional: Target the iframe that Telegram injects to ensure max-width */
+/* Target the iframe to ensure perfect centering and aesthetics */
 .telegram-embed-placeholder iframe {
-    max-width: 100% !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 550px !important;
+    margin: 0 auto !important;
     border-radius: 8px; /* Matches modern UI aesthetics */
+}
+
+.telegram-embed-footer {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 13px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .telegram-embed-footer {
+        display: none !important;
+    }
 }

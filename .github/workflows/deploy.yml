@@ -261,8 +261,50 @@ jobs:
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/business-economics
 
+      - name: 35. Checkout Space
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-space
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/space
+
+      - name: 36. Checkout Wildlife
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-wild-life
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/wild-life
+
+      - name: 37. Checkout Discoveries & Inventions
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-discoveries-and-inventions
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/discoveries-and-inventions
+
+      - name: 38. Checkout Minorities
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-minorities
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/minorities
+
+      - name: 39. Checkout Fact Check
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-fact-check
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/fact-check
+
+      - name: 40. Checkout Analysis
+        uses: actions/checkout@v4
+        with:
+          repository: TMPnews-urdu/tmp-articles-analysis
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/analysis
+
       # --- CONSOLIDATION ---
-      - name: 35. Consolidate All Posts
+      - name: 41. Consolidate All Posts
         run: |
           echo "--- Starting Consolidation ---"
           mkdir -p ./main_site/_posts
@@ -309,6 +351,12 @@ jobs:
           copy_posts "strategic-deals"
           copy_posts "speeches-press-conference"
           copy_posts "business-economics"
+          copy_posts "space"
+          copy_posts "wild-life"
+          copy_posts "discoveries-and-inventions"
+          copy_posts "minorities"
+          copy_posts "fact-check"
+          copy_posts "analysis"
           
           # --- SPECIAL COPY FOR USER ARCHIVES ---
           # (This repo uses '_posts' instead of 'posts')
@@ -322,19 +370,19 @@ jobs:
           echo "--- Verification: Files in _posts ---"
           ls -R ./main_site/_posts
       
-      - name: 36. Setup Ruby
+      - name: 42. Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
           working-directory: ./main_site 
           
-      - name: 37. Build with Jekyll
+      - name: 43. Build with Jekyll
         run: JEKYLL_ENV=production bundle exec jekyll build --trace
         working-directory: ./main_site 
 
       # --- ASSET LINKS FIX ---
-      - name: 37b. Setup AssetLinks Rewrite for Cloudflare
+      - name: 43b. Setup AssetLinks Rewrite for Cloudflare
         run: |
           echo "Setting up AssetLinks Rewrite..."
           cp .well-known/assetlinks.json _site/assetlinks.json
@@ -344,7 +392,7 @@ jobs:
           echo "AssetLinks rewrite setup complete."
         working-directory: ./main_site
         
-      - name: 38. Upload artifact for deployment
+      - name: 44. Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: jekyll-site

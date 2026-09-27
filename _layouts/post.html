@@ -73,6 +73,38 @@ layout: default
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
 
+    /* Guardian Sans Cond Webfont */
+    @font-face {
+        font-family: 'Guardian Sans Cond';
+        src: local('Guardian Sans Cond Regular'),
+             local('GuardianSansCond-Regular'),
+             local('Guardian Sans Condensed Regular'),
+             url("{{ '/assets/fonts/Guardian-Sans-Cond-Regular.otf' | relative_url }}") format('opentype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Guardian Sans Cond';
+        src: local('Guardian Sans Cond Semibold'),
+             local('GuardianSansCond-Semibold'),
+             local('Guardian Sans Condensed Semibold'),
+             url("{{ '/assets/fonts/Guardian-Sans-Cond-Semibold.otf' | relative_url }}") format('opentype');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'Guardian Sans Cond';
+        src: local('Guardian Sans Cond Bold'),
+             local('GuardianSansCond-Bold'),
+             local('Guardian Sans Condensed Bold'),
+             url("{{ '/assets/fonts/Guardian-Sans-Cond-Bold.otf' | relative_url }}") format('opentype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+
     .article-container { max-width: 1000px; margin: 0 auto; padding: 0.5rem 1rem 2rem 1rem; color: #111827; flex-grow: 1; }
     
     /* --- HEADLINE & SUBHEADLINE STYLES --- */
@@ -124,6 +156,8 @@ layout: default
     .article-body u b,
     .article-body strong u,
     .article-body u strong {
+        font-family: 'Guardian Sans Cond', 'Guardian Sans Condensed', 'guardian san cand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 700;
         display: inline-block;
         margin-top: 0.25rem !important;    
         margin-bottom: 0.25rem !important; 
@@ -144,53 +178,243 @@ layout: default
     .article-body a:hover { color: #1e40af; text-decoration-thickness: 2px; }
 
     /* --- HEADINGS INSIDE THE ARTICLE --- */
-    .article-body h2 { font-family: 'Merriweather', serif; font-weight: 700; font-size: 1.8rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; display: block; line-height: 1.3; }
-    .article-body h3 { font-family: 'Merriweather', serif; font-weight: 700; font-size: 1.5rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; display: block; line-height: 1.3; }
-    .article-body h4 { font-family: 'Merriweather', serif; font-weight: 700; font-size: 1.2rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; display: block; line-height: 1.3; }
-    
-    /* UPDATED BLOCKQUOTE STYLES (Matches CMS Preview) */
-    .article-body blockquote { 
-        border-left: 4px solid #3b82f6; 
-        margin: 2rem 0; 
-        font-style: italic; 
-        color: #4b5563; 
-        background: #f8fafc; 
-        padding: 1.5rem; 
-        border-radius: 0 8px 8px 0; 
+    .article-body h1,
+    .article-body h2,
+    .article-body h3,
+    .article-body h4,
+    .article-body h5,
+    .article-body h6 {
+        font-family: 'Guardian Sans Cond', 'Guardian Sans Condensed', 'guardian san cand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 700;
+        line-height: 1.3;
+        display: block;
+        letter-spacing: -0.01em;
     }
+    .article-body h1 { font-size: 2.1rem; margin-top: 1rem !important; margin-bottom: 1.15rem !important; }
+    .article-body h2 { font-size: 1.85rem; margin-top: 0.95rem !important; margin-bottom: 1.15rem !important; }
+    .article-body h3 { font-size: 1.55rem; margin-top: 0.85rem !important; margin-bottom: 1.15rem !important; }
+    .article-body h4 { font-size: 1.3rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; }
+    .article-body h5 { font-size: 1.15rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; }
+    .article-body h6 { font-size: 1.05rem; margin-top: 0.75rem !important; margin-bottom: 1.15rem !important; }
+    
+    /* ========================================================
+       MODERN, ATTRACTIVE QUOTE BOX & BLOCKQUOTE
+       ======================================================== */
+    .article-body blockquote { 
+        position: relative;
+        margin: 1.75rem 0; 
+        padding: 1rem 1rem 1rem 1.15rem;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #2563eb;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        color: #1f2937; 
+        font-family: 'Merriweather', Georgia, serif;
+        font-style: italic;
+        font-size: 1.08rem;
+        line-height: 1.75;
+        overflow: hidden;
+    }
+
+    /* Light decorative double comma watermark on top right */
+    .article-body blockquote::before {
+        content: "\201C";
+        position: absolute;
+        top: -12px;
+        right: 14px;
+        font-family: Georgia, serif;
+        font-size: 4.5rem;
+        line-height: 1;
+        color: currentColor;
+        opacity: 0.10;
+        pointer-events: none;
+        user-select: none;
+        font-style: normal;
+        font-weight: 700;
+    }
+
+    .article-body blockquote p { 
+        margin-bottom: 0.6rem; 
+        position: relative; 
+        z-index: 1; 
+    }
+    .article-body blockquote p:last-child { 
+        margin-bottom: 0; 
+    }
+
+    /* Author / Citation in Quote Box */
+    .article-body blockquote > strong:first-child,
+    .article-body blockquote .quote-author {
+        display: block !important;
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        color: #111827 !important;
+        margin-bottom: 0.5rem !important;
+        letter-spacing: 0.01em !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    .article-body blockquote cite,
+    .article-body blockquote footer,
+    .article-body blockquote .quote-attribution {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-style: normal !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        color: #4b5563 !important;
+        margin-top: 0.75rem !important;
+        padding-top: 0.6rem !important;
+        border-top: 1px solid #e5e7eb !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+    .article-body blockquote cite::before,
+    .article-body blockquote footer::before {
+        content: '—';
+        margin-right: 4px;
+        font-weight: bold;
+    }
+
     .article-body blockquote.quote-box {
         border-radius: 8px !important;
-        border-left-width: 5px !important;
+        border-left-width: 4px !important;
+        padding: 1rem 1rem 1rem 1.15rem !important;
+        margin: 1.75rem 0 !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
     }
+
+    /* ========================================================
+       MODERN, ATTRACTIVE SPEECH BOX / STATEMENT CARD
+       ======================================================== */
     .article-body .speech-box {
-        padding: 1.75rem;
-        border-radius: 8px;
+        position: relative;
+        padding: 1rem 1rem 1rem 1.15rem !important;
+        border-radius: 8px !important;
+        font-family: Georgia, 'Merriweather', serif;
+        line-height: 1.65 !important;
+        margin: 1.75rem 0 !important;
+        background: #fdfbf7;
+        border: 1px solid rgba(217, 119, 6, 0.25);
+        border-left: 4px solid #d97706 !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+        color: #292524;
+        overflow: hidden;
+    }
+
+    /* Decorative Speech Watermark */
+    .article-body .speech-box::before {
+        content: "\201C";
+        position: absolute;
+        top: -10px;
+        right: 14px;
         font-family: Georgia, serif;
-        line-height: 1.8;
-        margin: 2rem 0;
-        border: 1px solid #e7d8c9;
-        border-left: 5px solid #d97706;
-    }
-    .article-body .speech-header {
-        font-family: 'Inter', sans-serif;
+        font-size: 4rem;
+        line-height: 1;
+        color: currentColor;
+        opacity: 0.10;
+        pointer-events: none;
+        user-select: none;
+        font-style: normal;
         font-weight: 700;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
+
+    /* Modern Speaker Badge Header */
+    .article-body .speech-header {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        margin-bottom: 0.65rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 3px 10px !important;
+        border-radius: 14px !important;
+        background: rgba(0, 0, 0, 0.05) !important;
+        border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        position: relative !important;
+        z-index: 1 !important;
+        width: fit-content !important;
+    }
+
+    .article-body .speech-header i {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
     .article-body .speech-body {
-        font-size: 1.1rem;
+        font-size: 1.08rem !important;
+        line-height: 1.65 !important;
+        position: relative;
+        z-index: 1;
     }
-    .article-body blockquote p { margin-bottom: 0.75rem; }
-    .article-body blockquote p:last-child { margin-bottom: 0; }
+
+    .article-body .speech-body p {
+        margin-bottom: 0.55rem !important;
+        line-height: 1.65 !important;
+    }
+
+    .article-body .speech-body p:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Sleek User-friendly Copy Button for Quote & Speech Boxes */
+    .box-copy-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        padding: 4px 9px;
+        font-size: 11px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        z-index: 2;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .article-body blockquote:hover .box-copy-btn,
+    .article-body .speech-box:hover .box-copy-btn {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    @media (hover: none) {
+        .box-copy-btn {
+            opacity: 0.75;
+            transform: translateY(0);
+        }
+    }
+    .box-copy-btn:hover {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .box-copy-btn.copied {
+        background: #ecfdf5 !important;
+        border-color: #a7f3d0 !important;
+        color: #059669 !important;
+    }
 
     /* PROTECT THE HEADING GAPS from legacy <br> artifacts */
-    .article-body br + h2, .article-body br + h3, .article-body br + h4 { display: none !important; }
-    .article-body h2 + br, .article-body h3 + br, .article-body h4 + br { display: none !important; }
+    .article-body br + h1, .article-body br + h2, .article-body br + h3, .article-body br + h4, .article-body br + h5, .article-body br + h6 { display: none !important; }
+    .article-body h1 + br, .article-body h2 + br, .article-body h3 + br, .article-body h4 + br, .article-body h5 + br, .article-body h6 + br { display: none !important; }
 
     /* Image Styling */
     .article-figure { max-width: 100%; margin: -0.75rem auto 0.5rem auto; padding: 0; border: none; }
@@ -208,24 +432,178 @@ layout: default
         line-height: 1.25 !important; 
     }
 
-    /* --- TABLE STYLES --- */
-    .table-scroll-wrapper { position: relative; margin: 1.5rem 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-    .article-body .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; background: white; }
-    .article-body table { width: 100%; border-collapse: collapse; min-width: 600px; font-family: 'Inter', sans-serif; font-size: 15px; margin: 0; }
-    .article-body caption { caption-side: bottom; padding: 8px; font-size: 0.85rem; color: #6b7280; text-align: left; border-top: 1px solid #f3f4f6; background: #fdfdfd; font-style: italic; }
-    .article-body th, .article-body td { padding: 12px 16px; vertical-align: top; line-height: 1.5; color: #374151; }
-    .article-body th { background-color: #f8fafc; font-weight: 700; text-align: left; color: #111827; white-space: nowrap; border-bottom: 2px solid #e2e8f0; }
-    .article-body td { border-bottom: 1px solid #f1f5f9; }
-    .article-body tr:last-child td { border-bottom: none; }
-    .table-container.striped tr:nth-child(even) { background-color: #f9fafb; }
+    /* ========================================================
+       MODERN, RESPONSIVE TABLE STYLES & COLUMN COLOR PRESERVATION
+       ======================================================== */
+    .table-scroll-wrapper { 
+        position: relative; 
+        margin: 2rem 0; 
+        border: 1px solid #e2e8f0; 
+        border-radius: 10px; 
+        overflow: hidden; 
+        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05); 
+        background: #ffffff;
+    }
+    .article-body .table-container { 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        width: 100%; 
+        background: #ffffff; 
+    }
+    .article-body table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        min-width: 600px; 
+        font-family: 'Inter', sans-serif; 
+        font-size: 15px; 
+        margin: 0; 
+    }
+    .article-body caption { 
+        caption-side: bottom; 
+        padding: 10px 16px; 
+        font-size: 0.85rem; 
+        color: #64748b; 
+        text-align: left; 
+        border-top: 1px solid #f1f5f9; 
+        background: #f8fafc; 
+        font-style: italic; 
+    }
+    .article-body th, .article-body td { 
+        padding: 12px 18px; 
+        vertical-align: top; 
+        line-height: 1.6; 
+        color: #334155; 
+    }
+    .article-body th { 
+        background-color: #f8fafc; 
+        font-weight: 700; 
+        text-align: left; 
+        color: #0f172a; 
+        white-space: nowrap; 
+        border-bottom: 2px solid #cbd5e1; 
+    }
+    .article-body td { 
+        border-bottom: 1px solid #f1f5f9; 
+    }
+    .article-body tr:last-child td { 
+        border-bottom: none; 
+    }
+
+    /* Table theme variants */
+    .table-container.striped tr:nth-child(even) td:not([style*="background"]):not([style*="background-color"]):not([bgcolor]):not(.has-custom-bg) { 
+        background-color: #f8fafc; 
+    }
     .table-container.grid table { border: 1px solid #cbd5e1; }
-    .table-container.grid th, .table-container.grid td { border: 1px solid #cbd5e1; }
-    table.sortable th { cursor: pointer; user-select: none; position: relative; padding-right: 24px; }
+    .table-container.grid th, .table-container.grid td { border: 1px solid #e2e8f0; }
+
+    /* Sortable headers */
+    table.sortable th { cursor: pointer; user-select: none; position: relative; padding-right: 28px; }
     table.sortable th:hover { background-color: #eff6ff; color: #1d4ed8; }
-    table.sortable th::after { content: '\f0dc'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 10px; opacity: 0.5; }
-    .table-scroll-wrapper::after { content: '\f061'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; top: 0; right: 0; bottom: 0; width: 40px; background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1) 80%); display: flex; align-items: center; justify-content: center; color: #94a3b8; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; font-size: 12px; padding-left: 10px; }
+    table.sortable th::after { content: '\f0dc'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 11px; opacity: 0.6; }
+    table.sortable th.asc::after { content: '\f0de'; color: #1d4ed8; opacity: 1; }
+    table.sortable th.desc::after { content: '\f0dd'; color: #1d4ed8; opacity: 1; }
+
+    /* Horizontal scroll indicator hint for mobile/touch */
+    .table-scroll-wrapper::after { 
+        content: '\f061'; 
+        font-family: "Font Awesome 6 Free"; 
+        font-weight: 900; 
+        position: absolute; 
+        top: 0; 
+        right: 0; 
+        bottom: 0; 
+        width: 40px; 
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.95) 80%); 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        color: #94a3b8; 
+        pointer-events: none; 
+        opacity: 0; 
+        transition: opacity 0.3s ease; 
+        font-size: 12px; 
+        padding-left: 10px; 
+    }
     .table-scroll-wrapper.is-scrollable::after { opacity: 1; }
     .table-scroll-wrapper.scrolled-end::after { opacity: 0; }
+
+    /* ========================================================
+       DARK MODE ADAPTATIONS FOR POST ELEMENTS
+       ======================================================== */
+    html.dark-mode .article-body blockquote {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        border-left-color: #3b82f6 !important;
+        color: #f1f5f9 !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+    }
+    html.dark-mode .article-body blockquote > strong:first-child,
+    html.dark-mode .article-body blockquote .quote-author {
+        color: #93c5fd !important;
+    }
+    html.dark-mode .article-body blockquote cite,
+    html.dark-mode .article-body blockquote footer {
+        border-top-color: #334155 !important;
+        color: #93c5fd !important;
+    }
+    html.dark-mode .article-body .speech-box {
+        background-color: #1e293b !important;
+        border-color: rgba(217, 119, 6, 0.3) !important;
+        border-left-color: #d97706 !important;
+        color: #f1f5f9 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    }
+    html.dark-mode .article-body .speech-header {
+        background-color: rgba(217, 119, 6, 0.15) !important;
+        border-color: rgba(217, 119, 6, 0.3) !important;
+        color: #f59e0b !important;
+    }
+    html.dark-mode .article-body .speech-body {
+        color: #e2e8f0 !important;
+    }
+    html.dark-mode .box-copy-btn {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+        color: #94a3b8 !important;
+    }
+    html.dark-mode .box-copy-btn:hover {
+        background: #334155 !important;
+        color: #ffffff !important;
+    }
+    html.dark-mode .box-copy-btn.copied {
+        background: rgba(6, 78, 59, 0.9) !important;
+        border-color: #059669 !important;
+        color: #6ee7b7 !important;
+    }
+
+    html.dark-mode .table-scroll-wrapper {
+        border-color: #374151 !important;
+        background: #1f2937 !important;
+    }
+    html.dark-mode .article-body .table-container {
+        background: #1f2937 !important;
+    }
+    html.dark-mode .article-body th:not([style*="background"]):not([style*="background-color"]):not(.has-custom-bg) {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+        border-bottom-color: #374151 !important;
+    }
+    html.dark-mode .article-body td:not([style*="background"]):not([style*="background-color"]):not(.has-custom-bg) {
+        color: #e5e7eb !important;
+        border-bottom-color: #374151 !important;
+    }
+    html.dark-mode .table-container.striped tr:nth-child(even) td:not([style*="background"]):not([style*="background-color"]):not([bgcolor]):not(.has-custom-bg) {
+        background-color: #1a2234 !important;
+    }
+    html.dark-mode .article-body caption {
+        background: #111827 !important;
+        color: #9ca3af !important;
+        border-top-color: #374151 !important;
+    }
+    html.dark-mode .table-scroll-wrapper::after {
+        background: linear-gradient(to right, rgba(31,41,55,0), rgba(31,41,55,1) 85%) !important;
+        color: #94a3b8 !important;
+    }
 
     /* --- EMBED STYLES --- */
     .embed-container { margin: 2rem 0; display: block !important; text-align: center; width: 100%; max-width: 100%; height: auto !important; overflow: visible !important; }
@@ -583,60 +961,226 @@ function setupArticleInteractions() {
         });
     }
 
-    const tables = document.querySelectorAll('.table-container.sortable table');
-    tables.forEach(table => {
-        if (table.dataset.hasSortListener) return; 
-        table.dataset.hasSortListener = "true";
+    // ========================================================
+    // TABLE ENHANCEMENTS: Column Colors, Scrolling, & Sorting
+    // ========================================================
+    function setupTableEnhancements() {
+        document.querySelectorAll('.article-body table').forEach(table => {
+            // 1. Ensure table is properly wrapped for responsive scrolling
+            let container = table.closest('.table-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'table-container';
+                table.parentNode.insertBefore(container, table);
+                container.appendChild(table);
+            }
+            let scrollWrapper = container.closest('.table-scroll-wrapper');
+            if (!scrollWrapper) {
+                scrollWrapper = document.createElement('div');
+                scrollWrapper.className = 'table-scroll-wrapper';
+                container.parentNode.insertBefore(scrollWrapper, container);
+                scrollWrapper.appendChild(container);
+            }
 
-        const headers = table.querySelectorAll('th');
-        headers.forEach((header, index) => {
-            header.addEventListener('click', () => {
-                const tbody = table.querySelector('tbody');
-                const rows = Array.from(tbody.querySelectorAll('tr'));
-                const isAsc = header.classList.contains('asc');
-                
-                headers.forEach(h => h.classList.remove('asc', 'desc'));
-                header.classList.toggle('asc', !isAsc);
-                header.classList.toggle('desc', isAsc);
-                
-                const direction = !isAsc ? 1 : -1;
-                const sortedRows = rows.sort((a, b) => {
-                    const aCol = a.children[index].textContent.trim();
-                    const bCol = b.children[index].textContent.trim();
-                    const aNum = parseFloat(aCol.replace(/[^0-9.-]+/g,""));
-                    const bNum = parseFloat(bCol.replace(/[^0-9.-]+/g,""));
-                    
-                    if (!isNaN(aNum) && !isNaN(bNum) && aCol.match(/\d/)) {
-                        return (aNum - bNum) * direction;
-                    }
-                    return aCol.localeCompare(bCol) * direction;
-                });
-                
-                tbody.innerHTML = '';
-                sortedRows.forEach(row => tbody.appendChild(row));
+            // 2. Legacy bgcolor and color attributes support
+            table.querySelectorAll('[bgcolor]').forEach(el => {
+                const bg = el.getAttribute('bgcolor');
+                if (bg) {
+                    el.style.setProperty('background-color', bg, 'important');
+                    el.classList.add('has-custom-bg');
+                }
             });
+            table.querySelectorAll('[color]').forEach(el => {
+                const col = el.getAttribute('color');
+                if (col) el.style.setProperty('color', col, 'important');
+            });
+
+            // 3. Colgroup & Col Color Propagation (Fixes table column color not showing)
+            const colElements = table.querySelectorAll('colgroup col, col');
+            if (colElements.length > 0) {
+                colElements.forEach((col, idx) => {
+                    const bg = col.style.backgroundColor || col.style.background || col.getAttribute('bgcolor');
+                    const textCol = col.style.color || col.getAttribute('color');
+                    const colClass = col.className;
+
+                    if (bg || textCol || colClass) {
+                        table.querySelectorAll('tr').forEach(row => {
+                            const cell = row.children[idx];
+                            if (cell) {
+                                if (bg && (!cell.style.backgroundColor || cell.style.backgroundColor === 'transparent')) {
+                                    cell.style.setProperty('background-color', bg, 'important');
+                                    cell.classList.add('has-custom-bg');
+                                }
+                                if (textCol && !cell.style.color) {
+                                    cell.style.setProperty('color', textCol, 'important');
+                                }
+                                if (colClass) {
+                                    cell.classList.add(...colClass.split(' ').filter(Boolean));
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 4. Protect inline background-color and text color on all th and td cells
+            table.querySelectorAll('th, td').forEach(cell => {
+                if (cell.style.backgroundColor && cell.style.backgroundColor !== 'transparent') {
+                    cell.style.setProperty('background-color', cell.style.backgroundColor, 'important');
+                    cell.classList.add('has-custom-bg');
+                }
+                if (cell.style.color) {
+                    cell.style.setProperty('color', cell.style.color, 'important');
+                }
+                // Handle inner colored elements like <span style="color: red"> or <font color="red">
+                const innerColored = cell.querySelector('[style*="color"], font[color]');
+                if (innerColored) {
+                    const ic = innerColored.style.color || innerColored.getAttribute('color');
+                    if (ic) cell.style.setProperty('color', ic, 'important');
+                }
+            });
+
+            // 5. Scroll indicator detection
+            const updateScroll = () => {
+                if (container.scrollWidth > container.clientWidth) {
+                    scrollWrapper.classList.add('is-scrollable');
+                    const atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 8;
+                    scrollWrapper.classList.toggle('scrolled-end', atEnd);
+                } else {
+                    scrollWrapper.classList.remove('is-scrollable');
+                }
+            };
+            updateScroll();
+            container.addEventListener('scroll', updateScroll, { passive: true });
+            window.addEventListener('resize', updateScroll, { passive: true });
+
+            // 6. Sortable support
+            if ((container.classList.contains('sortable') || table.classList.contains('sortable')) && !table.dataset.hasSortListener) {
+                table.dataset.hasSortListener = "true";
+                const headers = table.querySelectorAll('th');
+                headers.forEach((header, index) => {
+                    header.addEventListener('click', () => {
+                        const tbody = table.querySelector('tbody') || table;
+                        const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.querySelector('th'));
+                        const isAsc = header.classList.contains('asc');
+                        
+                        headers.forEach(h => h.classList.remove('asc', 'desc'));
+                        header.classList.toggle('asc', !isAsc);
+                        header.classList.toggle('desc', isAsc);
+                        
+                        const direction = !isAsc ? 1 : -1;
+                        const sortedRows = rows.sort((a, b) => {
+                            const aCell = a.children[index];
+                            const bCell = b.children[index];
+                            if (!aCell || !bCell) return 0;
+                            const aCol = aCell.textContent.trim();
+                            const bCol = bCell.textContent.trim();
+                            const aNum = parseFloat(aCol.replace(/[^0-9.-]+/g, ""));
+                            const bNum = parseFloat(bCol.replace(/[^0-9.-]+/g, ""));
+                            
+                            if (!isNaN(aNum) && !isNaN(bNum) && aCol.match(/\d/)) {
+                                return (aNum - bNum) * direction;
+                            }
+                            return aCol.localeCompare(bCol) * direction;
+                        });
+                        
+                        sortedRows.forEach(row => tbody.appendChild(row));
+                    });
+                });
+            }
         });
-    });
+    }
 
-    // Format quote boxes and speech boxes to preserve paragraph breaks
-    document.querySelectorAll('.quote-box, .speech-box').forEach(box => {
-        if (box.querySelector('p')) return;
-        let contentNode = box;
-        if (box.classList.contains('speech-box')) {
-            contentNode = box.querySelector('.speech-body');
-            if (!contentNode) return;
-        }
-        const rawHtml = contentNode.innerHTML.trim();
-        const paras = rawHtml.split(/\n{2,}/)
-                             .map(p => p.trim())
-                             .filter(Boolean)
-                             .map(p => `<p>${p}</p>`)
-                             .join('\n');
-        if (paras) {
-            contentNode.innerHTML = paras;
-        }
-    });
+    // ========================================================
+    // QUOTE BOX & SPEECH BOX: Formatting & Interactive Copy
+    // ========================================================
+    function setupQuoteAndSpeechEnhancements() {
+        document.querySelectorAll('.article-body blockquote, .article-body .speech-box').forEach(box => {
+            // Preserve paragraph breaks if needed
+            if (!box.querySelector('p')) {
+                let contentNode = box;
+                if (box.classList.contains('speech-box')) {
+                    contentNode = box.querySelector('.speech-body');
+                }
+                if (contentNode) {
+                    const rawHtml = contentNode.innerHTML.trim();
+                    const paras = rawHtml.split(/\n{2,}/)
+                                         .map(p => p.trim())
+                                         .filter(Boolean)
+                                         .map(p => `<p>${p}</p>`)
+                                         .join('\n');
+                    if (paras) {
+                        contentNode.innerHTML = paras;
+                    }
+                }
+            }
 
+            // Add sleek, user-friendly Copy button
+            if (!box.querySelector('.box-copy-btn')) {
+                const btn = document.createElement('button');
+                btn.className = 'box-copy-btn';
+                btn.type = 'button';
+                btn.setAttribute('aria-label', 'Copy to clipboard');
+                btn.setAttribute('title', 'Copy text');
+                btn.innerHTML = '<i class="far fa-copy"></i><span>Copy</span>';
+
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    let textToCopy = '';
+                    if (box.classList.contains('speech-box')) {
+                        const body = box.querySelector('.speech-body');
+                        const header = box.querySelector('.speech-header');
+                        textToCopy = (header ? header.innerText.trim() + '\n' : '') + (body ? body.innerText.trim() : box.innerText.trim());
+                    } else {
+                        const clone = box.cloneNode(true);
+                        clone.querySelectorAll('.box-copy-btn').forEach(n => n.remove());
+                        textToCopy = clone.innerText.trim();
+                    }
+
+                    if (textToCopy && !textToCopy.includes('TMPnews.com')) {
+                        textToCopy += '\n— TMPnews.com';
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+                        btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="far fa-copy"></i><span>Copy</span>';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        if (typeof copyToClipboard === 'function') {
+                            copyToClipboard(textToCopy);
+                        }
+                    }
+                });
+
+                box.appendChild(btn);
+            }
+
+            // Also attach copy event listener so if user manually selects and copies text, TMPnews.com is appended
+            if (!box.dataset.hasCopyListener) {
+                box.dataset.hasCopyListener = "true";
+                box.addEventListener('copy', (e) => {
+                    const selection = window.getSelection();
+                    if (!selection || !selection.rangeCount) return;
+                    const selectedText = selection.toString().trim();
+                    if (selectedText && !selectedText.includes('TMPnews.com')) {
+                        e.preventDefault();
+                        const finalText = selectedText + '\n— TMPnews.com';
+                        if (e.clipboardData) {
+                            e.clipboardData.setData('text/plain', finalText);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    setupTableEnhancements();
+    setupQuoteAndSpeechEnhancements();
     renderTelegramEmbeds();
 }
 

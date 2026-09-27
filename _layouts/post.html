@@ -325,6 +325,26 @@ layout: default
         font-weight: 700;
     }
 
+    /* Safeguard against nested speech/quote boxes */
+    .article-body .speech-box .speech-box,
+    .article-body blockquote.quote-box blockquote.quote-box {
+        position: static !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+    .article-body .speech-box .speech-box::before,
+    .article-body blockquote.quote-box blockquote.quote-box::before {
+        display: none !important;
+    }
+    .article-body .speech-box .speech-box .box-copy-btn,
+    .article-body blockquote.quote-box blockquote.quote-box .box-copy-btn {
+        display: none !important;
+    }
+
     /* Modern Speaker Badge Header */
     .article-body .speech-header {
         font-family: 'Inter', sans-serif !important;

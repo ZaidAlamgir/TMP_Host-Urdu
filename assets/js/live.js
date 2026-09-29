@@ -226,7 +226,7 @@
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
-        const LIVE_FEED_URL = 'https://data.tmpnews.com/feed.json';
+        const LIVE_FEED_URL = 'https://data.tmpnews.com/feed.json?lang=ur';
         const archiveBtn = document.getElementById('archive-btn');
         const noMorePostsMsg = document.getElementById('no-more-posts-msg');
         const INITIAL_LOAD_COUNT = 80; 
@@ -235,19 +235,22 @@
             sessionStorage.removeItem('cachedLiveFeed');
             sessionStorage.removeItem('cachedLiveFeed_ur_v2');
             sessionStorage.removeItem('cachedLiveFeed_ur_v3');
+            sessionStorage.removeItem('cachedLiveFeed_ur_v4');
+            sessionStorage.removeItem('cachedLiveFeed_ur_v5');
             localStorage.removeItem('prefetchedLiveFeed');
             localStorage.removeItem('prefetchedLiveFeed_ur_v2');
             localStorage.removeItem('prefetchedLiveFeed_ur_v3');
             localStorage.removeItem('prefetchedLiveFeed_ur_v4');
+            localStorage.removeItem('prefetchedLiveFeed_ur_v5');
             localStorage.removeItem('prefetchedLiveFeedTimestamp');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v2');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v3');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v4');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v5');
         } catch (e) {}
-        sessionStorage.removeItem('cachedLiveFeed_ur_v4');
-        const CACHE_KEY = 'cachedLiveFeed_ur_v5';
-        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v5';
-        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v5';
+        const CACHE_KEY = 'cachedLiveFeed_ur_v6';
+        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v6';
+        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v6';
         let allPosts = []; 
         let loadedPostsCount = 0;
         const viewedPosts = new Set(safeJSONParse(sessionStorage.getItem('viewedLivePosts'), []));
@@ -582,6 +585,12 @@
 
         function hasUrduTranslation(postData) {
             if (!postData) return false;
+            // Native Urdu entry from new sync architecture
+            if (postData.lang === 'ur') return true;
+            // Exclude child translations belonging to other languages
+            if (postData.lang && postData.lang !== 'ur' && postData.parent_id) return false;
+            if (postData.lang === 'hi') return false;
+
             const urHeadline = extractLangContent(postData.headline, 'ur');
             const urContent = extractLangContent(postData.content, 'ur');
 
@@ -616,8 +625,8 @@
                 return;
             }
 
-            const postHeadline = extractLangContent(postData.headline, 'ur');
-            const postContent = extractLangContent(postData.content, 'ur');
+            const postHeadline = postData.lang === 'ur' ? (postData.headline || '') : extractLangContent(postData.headline, 'ur');
+            const postContent = postData.lang === 'ur' ? (postData.content || '') : extractLangContent(postData.content, 'ur');
 
             if (!postHeadline && !postContent) {
                 return;
@@ -778,12 +787,24 @@
             loadMorePosts(false);
         };
         
+        if (window._activeLiveChannel && supabaseClient) {
+            try { supabaseClient.removeChannel(window._activeLiveChannel); } catch(e) {}
+        }
         if (typeof supabase !== 'undefined' && supabaseClient) {
-            supabaseClient.channel('live_updates_listener')
+            window._activeLiveChannel = supabaseClient.channel('live_updates_listener_ur_' + Date.now())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'live_posts' }, (payload) => {
+                    const newPostData = payload.new;
+                    
+                    // Strictly ignore posts that do not belong to Urdu
+                    if (newPostData && (newPostData.lang === 'hi' || (newPostData.parent_id && newPostData.lang !== 'ur'))) {
+                        return;
+                    }
+                    if (newPostData && newPostData.lang === 'en' && !hasUrduTranslation(newPostData)) {
+                        return;
+                    }
+
                     sessionStorage.removeItem(CACHE_KEY); 
                     localStorage.removeItem(PREFETCH_KEY); 
-                    const newPostData = payload.new;
                     
                     if (payload.eventType === 'INSERT') {
                         if (hasUrduTranslation(newPostData)) {
@@ -799,23 +820,41 @@
                     } 
                     else if (payload.eventType === 'UPDATE') {
                         const existingElement = document.getElementById(`post-${newPostData.id}`);
-                        if (!hasUrduTranslation(newPostData)) {
-                            if (existingElement) existingElement.remove();
-                            allPosts = allPosts.filter(p => p.id !== newPostData.id);
+                        if (!existingElement) {
+                            if (hasUrduTranslation(newPostData)) {
+                                if (newPostData.is_pinned) {
+                                    loadMorePosts(true);
+                                } else {
+                                    renderPost(newPostData, liveFeed, true);
+                                    allPosts.unshift(newPostData);
+                                    loadedPostsCount++;
+                                    setTimeout(loadSocialScripts, 200);
+                                }
+                            }
                         } else {
-                            const currentIsPinned = existingElement ? existingElement.classList.contains('is-pinned') : false;
+                            const currentIsPinned = existingElement.classList.contains('is-pinned');
                             const newIsPinned = newPostData.is_pinned;
 
-                            if (!existingElement || (newIsPinned !== currentIsPinned)) { 
+                            if (newIsPinned !== currentIsPinned) { 
                                 loadMorePosts(true); 
                             }
-                            else if (existingElement) {
+                            else {
                                 const hlEl = existingElement.querySelector('.live-post-headline');
                                 const bodyEl = existingElement.querySelector('.post-body');
-                                const newHl = extractLangContent(newPostData.headline, 'ur');
-                                const newCnt = extractLangContent(newPostData.content, 'ur');
-                                if (hlEl) hlEl.textContent = newHl || '';
-                                if (bodyEl) bodyEl.innerHTML = parseContent(newCnt || '');
+                                
+                                const newHl = newPostData.lang === 'ur' ? (newPostData.headline || '') : extractLangContent(newPostData.headline, 'ur');
+                                const newCnt = newPostData.lang === 'ur' ? (newPostData.content || '') : extractLangContent(newPostData.content, 'ur');
+                                
+                                if (hlEl && newHl) {
+                                    hlEl.textContent = newHl;
+                                }
+                                if (bodyEl && newCnt) {
+                                    const parsedCnt = parseContent(newCnt);
+                                    if (parsedCnt) {
+                                        bodyEl.innerHTML = parsedCnt;
+                                        renderTelegramEmbeds();
+                                    }
+                                }
 
                                 const likeCountSpan = existingElement.querySelector(`#like-count-${newPostData.id}`);
                                 const viewCountSpan = existingElement.querySelector(`#view-count-${newPostData.id}`);

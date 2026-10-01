@@ -12,7 +12,7 @@ permalink: /news-sitemap.xml
   {%- comment %} 172800 seconds = 48 hours; allow slight clock drift {% endcomment -%}
   {%- if age_seconds < 172800 and age_seconds >= -7200 %}
   <url>
-    <loc>{{ post.url | absolute_url }}</loc>
+    <loc>{{ post.url | absolute_url | xml_escape }}</loc>
     <news:news>
       <news:publication>
         <news:name>The Urdu Post</news:name>

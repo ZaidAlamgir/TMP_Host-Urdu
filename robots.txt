@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.tmpnews.com/sitemap.xml
-Sitemap: https://www.tmpnews.com/news-sitemap.xml
+Sitemap: https://theurdupost.tmpnews.com/sitemap.xml
+Sitemap: https://theurdupost.tmpnews.com/news-sitemap.xml

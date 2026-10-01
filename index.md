@@ -273,7 +273,23 @@ html.dark-mode .subheadline-container::after {
                 </div>
             </div>
             
-            <div class="news-grid-full" id="home-articles-grid" style="min-height: 150px;"></div>
+            <div class="news-grid-full" id="home-articles-grid" style="min-height: 150px;">
+                {% for post in site.posts limit: 6 offset: 1 %}
+                <a href="{{ post.url | relative_url }}" class="news-card">
+                    <div class="news-card-image-wrapper">
+                        <img src="{{ post.image | default: 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image' }}" alt="{{ post.image_description | default: post.title | escape }}" class="news-card-image" loading="lazy">
+                        <p class="news-card-date">{{ post.date | date: "%B %d, %Y" }}</p>
+                    </div>
+                    <div class="news-card-text">
+                        <h3 class="news-card-headline" style="font-weight:700;font-size:1.15rem;margin-bottom:0.5rem;">{{ post.title }}</h3>
+                        <div class="subheadline-container">
+                            <p class="news-card-subheadline" style="font-size:0.95rem;color:#606770;line-height:1.5;margin:0;">{{ post.subheadline | default: post.content | strip_html | truncatewords: 25 }}</p>
+                        </div>
+                        <span class="read-more-text" style="font-size:0.85rem;font-weight:800;color:#0073e6;margin-top:auto;">مزید پڑھیں &larr;</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
             <div id="home-loader" class="loader"></div>
             
             <div style="text-align: center; margin-top: 3rem;">

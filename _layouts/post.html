@@ -26,7 +26,9 @@ layout: default
     "@id": "{{ page.url | absolute_url }}"
   },
   "headline": "{{ page.title | strip_html | escape }}",
-  "image": "{% if page.image and page.image != "" %}{{ page.image | absolute_url }}{% else %}{{ '/android-chrome-512x512.png' | absolute_url }}{% endif %}",
+  "image": [
+    "{% if page.image and page.image != "" %}{{ page.image | absolute_url }}{% else %}{{ '/android-chrome-512x512.png' | absolute_url }}{% endif %}"
+  ],
   "datePublished": "{{ page.date | date_to_xmlschema }}",
   "dateModified": "{{ page.last_modified_at | default: page.date | date_to_xmlschema }}",
   "author": {

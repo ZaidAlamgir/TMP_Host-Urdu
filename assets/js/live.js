@@ -769,16 +769,17 @@
                  }
              }
              try {
-                 const sep = LIVE_FEED_URL.includes('?') ? '&' : '?';
                  const fetchUrl = forceCacheBypass 
-                     ? `${LIVE_FEED_URL}${sep}_t=${Date.now()}&refresh=1` 
-                     : `${LIVE_FEED_URL}${sep}_t=${Date.now()}`;
-                 const fetchOptions = {
-                     cache: forceCacheBypass ? 'no-cache' : 'default',
-                     headers: forceCacheBypass ? {
+                     ? `${LIVE_FEED_URL}${LIVE_FEED_URL.includes('?') ? '&' : '?'}refresh=1`
+                     : LIVE_FEED_URL;
+                 const fetchOptions = forceCacheBypass ? {
+                     cache: 'no-cache',
+                     headers: {
                          'Cache-Control': 'no-cache, no-store, must-revalidate',
                          'Pragma': 'no-cache'
-                     } : {}
+                     }
+                 } : {
+                     cache: 'default'
                  };
                  const response = await fetch(fetchUrl, fetchOptions); 
                  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -803,11 +804,8 @@
             if (isSyncing) return;
             isSyncing = true;
             try {
-                const sep = LIVE_FEED_URL.includes('?') ? '&' : '?';
-                const fetchUrl = `${LIVE_FEED_URL}${sep}_t=${Date.now()}&refresh=1`;
-                const response = await fetch(fetchUrl, {
-                    cache: 'no-cache',
-                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                const response = await fetch(LIVE_FEED_URL, {
+                    cache: 'default'
                 });
                 if (!response.ok) return;
                 const freshData = await response.json();

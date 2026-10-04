@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v32';
-const ARTICLE_CACHE = 'tmp-articles-v32';
-const ASSET_CACHE = 'tmp-assets-v32';
+const CORE_CACHE = 'tmp-core-v33';
+const ARTICLE_CACHE = 'tmp-articles-v33';
+const ASSET_CACHE = 'tmp-assets-v33';
 const CORE_ASSETS = [
     '/',                      
     '/index.html',            
@@ -37,7 +37,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); 
     event.waitUntil(
         caches.open(CORE_CACHE).then(async (cache) => {
-            console.log('SW: Caching Core App Shell v32');
+            console.log('SW: Caching Core App Shell v33');
             for (let asset of CORE_ASSETS) {
                 try {
                     const response = await fetch(asset);
@@ -70,6 +70,13 @@ self.addEventListener('fetch', (event) => {
     const request = event.request;
     const url = new URL(request.url);
 
+    // Hard refresh or forced refresh detection: let browser bypass SW completely
+    const hasForcedBypass = request.cache === 'reload' ||
+                           request.headers.get('Cache-Control')?.includes('no-cache') ||
+                           request.headers.get('Pragma')?.includes('no-cache') ||
+                           url.searchParams.has('refresh') ||
+                           url.searchParams.has('nocache');
+
     if (
         url.hostname === 'localhost' ||
         url.hostname === '127.0.0.1' ||
@@ -82,14 +89,33 @@ self.addEventListener('fetch', (event) => {
         url.pathname.startsWith('/functions/') ||     
         url.pathname.endsWith('.json') ||             
         request.method !== 'GET' ||                   
-        request.headers.get('accept')?.includes('application/json') 
+        request.headers.get('accept')?.includes('application/json') ||
+        hasForcedBypass
     ) {
         return; 
     }
+
+    // Live script Network-First strategy
+    if (url.pathname.includes('/assets/js/live.js')) {
+        event.respondWith(
+            fetch(request).then((networkResponse) => {
+                if (networkResponse && networkResponse.ok) {
+                    const responseClone = networkResponse.clone();
+                    caches.open(CORE_CACHE).then((cache) => cache.put(request, responseClone));
+                }
+                return networkResponse;
+            }).catch(() => caches.match(request))
+        );
+        return;
+    }
+
     if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
         
         const isHomePage = (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '');
-        if (isHomePage) {
+        const isLivePage = (url.pathname === '/live' || url.pathname === '/live/' || url.pathname === '/live.html' || url.pathname.startsWith('/live/'));
+
+        // Both Homepage and Live page use Network-First to guarantee real-time updates
+        if (isHomePage || isLivePage) {
             event.respondWith(
                 fetch(request).then((networkResponse) => {
                     if (networkResponse && networkResponse.ok) {

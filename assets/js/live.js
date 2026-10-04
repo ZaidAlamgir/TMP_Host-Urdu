@@ -231,26 +231,83 @@
         const noMorePostsMsg = document.getElementById('no-more-posts-msg');
         const INITIAL_LOAD_COUNT = 80; 
         const SUBSEQUENT_LOAD_COUNT = 80;
+        const CACHE_KEY = 'cachedLiveFeed_ur_v7';
+        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v7';
+        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v7';
+        const CACHE_TTL_MS = 15000; // 15 seconds max client cache validity
+
+        // Detect if the user initiated a hard refresh or standard page reload
+        const isPageReload = (function() {
+            try {
+                if (window.performance) {
+                    if (performance.getEntriesByType) {
+                        const nav = performance.getEntriesByType('navigation')[0];
+                        if (nav && (nav.type === 'reload' || nav.type === 'back_forward')) {
+                            return nav.type === 'reload';
+                        }
+                    }
+                    if (performance.navigation && performance.navigation.type === 1) {
+                        return true;
+                    }
+                }
+            } catch(e) {}
+            return false;
+        })();
+        const hasForcedQuery = window.location.search.includes('refresh') || 
+                               window.location.search.includes('nocache') || 
+                               window.location.hash.includes('refresh');
+
+        // Immediately purge cache on reload or forced query
+        if (isPageReload || hasForcedQuery) {
+            sessionStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(PREFETCH_KEY);
+            localStorage.removeItem(PREFETCH_TIMESTAMP_KEY);
+        }
+
         try {
             sessionStorage.removeItem('cachedLiveFeed');
             sessionStorage.removeItem('cachedLiveFeed_ur_v2');
             sessionStorage.removeItem('cachedLiveFeed_ur_v3');
             sessionStorage.removeItem('cachedLiveFeed_ur_v4');
             sessionStorage.removeItem('cachedLiveFeed_ur_v5');
+            sessionStorage.removeItem('cachedLiveFeed_ur_v6');
             localStorage.removeItem('prefetchedLiveFeed');
             localStorage.removeItem('prefetchedLiveFeed_ur_v2');
             localStorage.removeItem('prefetchedLiveFeed_ur_v3');
             localStorage.removeItem('prefetchedLiveFeed_ur_v4');
             localStorage.removeItem('prefetchedLiveFeed_ur_v5');
+            localStorage.removeItem('prefetchedLiveFeed_ur_v6');
             localStorage.removeItem('prefetchedLiveFeedTimestamp');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v2');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v3');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v4');
             localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v5');
+            localStorage.removeItem('prefetchedLiveFeedTimestamp_ur_v6');
         } catch (e) {}
-        const CACHE_KEY = 'cachedLiveFeed_ur_v6';
-        const PREFETCH_KEY = 'prefetchedLiveFeed_ur_v6';
-        const PREFETCH_TIMESTAMP_KEY = 'prefetchedLiveFeedTimestamp_ur_v6';
+
+        function saveFeedToCache(data) {
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+                    timestamp: Date.now(),
+                    posts: data
+                }));
+            } catch(e) {}
+        }
+
+        function getFeedFromCache() {
+            const raw = sessionStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            const parsed = safeJSONParse(raw, null);
+            if (!parsed) return null;
+            if (Array.isArray(parsed)) {
+                return { timestamp: 0, posts: parsed };
+            }
+            if (parsed && Array.isArray(parsed.posts)) {
+                return parsed;
+            }
+            return null;
+        }
+
         let allPosts = []; 
         let loadedPostsCount = 0;
         const viewedPosts = new Set(safeJSONParse(sessionStorage.getItem('viewedLivePosts'), []));
@@ -693,31 +750,114 @@
                 const parsed = safeJSONParse(prefetchedData, null);
                 if (Array.isArray(parsed)) {
                     allPosts = parsed.filter(p => hasUrduTranslation(p));
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+                    saveFeedToCache(parsed);
                     return allPosts;
                 }
              }
              if (!forceCacheBypass) {
-                 const cachedData = sessionStorage.getItem(CACHE_KEY); 
-                 const parsed = safeJSONParse(cachedData, null);
-                 if (Array.isArray(parsed)) {
-                    allPosts = parsed.filter(p => hasUrduTranslation(p));
-                    return allPosts;
+                 const cached = getFeedFromCache();
+                 if (cached && Array.isArray(cached.posts)) {
+                     const isFresh = (Date.now() - cached.timestamp) < CACHE_TTL_MS;
+                     if (isFresh) {
+                         allPosts = cached.posts.filter(p => hasUrduTranslation(p));
+                         return allPosts;
+                     }
+                     // Stale-While-Revalidate: Return cached posts for instant render, but revalidate immediately in background
+                     allPosts = cached.posts.filter(p => hasUrduTranslation(p));
+                     setTimeout(() => syncFreshPostsInBackground(), 50);
+                     return allPosts;
                  }
              }
              try {
-                 const fetchOptions = forceCacheBypass ? { cache: 'no-cache' } : {};
-                 const response = await fetch(LIVE_FEED_URL, fetchOptions); 
+                 const sep = LIVE_FEED_URL.includes('?') ? '&' : '?';
+                 const fetchUrl = forceCacheBypass 
+                     ? `${LIVE_FEED_URL}${sep}_t=${Date.now()}&refresh=1` 
+                     : `${LIVE_FEED_URL}${sep}_t=${Date.now()}`;
+                 const fetchOptions = {
+                     cache: forceCacheBypass ? 'no-cache' : 'default',
+                     headers: forceCacheBypass ? {
+                         'Cache-Control': 'no-cache, no-store, must-revalidate',
+                         'Pragma': 'no-cache'
+                     } : {}
+                 };
+                 const response = await fetch(fetchUrl, fetchOptions); 
                  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                  const data = await response.json();
                  if (!Array.isArray(data)) throw new Error("API did not return an array.");
-                 sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); 
+                 saveFeedToCache(data); 
                  allPosts = data.filter(p => hasUrduTranslation(p));
                  return allPosts;
              } catch (error) { 
                  console.error('Error fetching feed:', error); 
+                 const cached = getFeedFromCache();
+                 if (cached && Array.isArray(cached.posts)) {
+                     allPosts = cached.posts.filter(p => hasUrduTranslation(p));
+                     return allPosts;
+                 }
                  return []; 
              }
+        }
+
+        let isSyncing = false;
+        async function syncFreshPostsInBackground() {
+            if (isSyncing) return;
+            isSyncing = true;
+            try {
+                const sep = LIVE_FEED_URL.includes('?') ? '&' : '?';
+                const fetchUrl = `${LIVE_FEED_URL}${sep}_t=${Date.now()}&refresh=1`;
+                const response = await fetch(fetchUrl, {
+                    cache: 'no-cache',
+                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                });
+                if (!response.ok) return;
+                const freshData = await response.json();
+                if (!Array.isArray(freshData)) return;
+
+                saveFeedToCache(freshData);
+                const freshUrdu = freshData.filter(p => hasUrduTranslation(p));
+
+                // 1. Pinned post sync
+                const freshPinned = freshUrdu.find(p => p.is_pinned);
+                const currentPinnedEl = pinnedPostContainer.querySelector('.live-post');
+                const currentPinnedId = currentPinnedEl ? currentPinnedEl.id.replace('post-', '') : null;
+
+                if (freshPinned) {
+                    if (!currentPinnedId || String(freshPinned.id) !== String(currentPinnedId)) {
+                        pinnedPostContainer.innerHTML = '';
+                        renderPost(freshPinned, pinnedPostContainer, false);
+                    }
+                } else if (currentPinnedEl) {
+                    pinnedPostContainer.innerHTML = '';
+                }
+
+                // 2. Regular posts sync (prepend any new posts)
+                const freshRegular = freshUrdu.filter(p => !p.is_pinned);
+                if (allPosts.length > 0 && freshRegular.length > 0) {
+                    const currentTopId = allPosts[0]?.id;
+                    const newPostsToPrepend = [];
+                    for (const p of freshRegular) {
+                        if (String(p.id) === String(currentTopId)) break;
+                        if (!document.getElementById(`post-${p.id}`)) {
+                            newPostsToPrepend.push(p);
+                        }
+                    }
+                    if (newPostsToPrepend.length > 0) {
+                        for (let i = newPostsToPrepend.length - 1; i >= 0; i--) {
+                            renderPost(newPostsToPrepend[i], liveFeed, true);
+                            allPosts.unshift(newPostsToPrepend[i]);
+                            loadedPostsCount++;
+                        }
+                        setTimeout(loadSocialScripts, 200);
+                    }
+                } else if (allPosts.length === 0 && freshRegular.length > 0) {
+                    allPosts = freshRegular;
+                    loadMorePosts(true);
+                }
+            } catch(err) {
+                console.warn('Background live sync error:', err);
+            } finally {
+                isSyncing = false;
+            }
         }
 
         async function loadMorePosts(isFullRefresh = false) {
@@ -882,11 +1022,40 @@
             console.warn("Supabase SDK blocked or failed to load. Real-time live updates disabled.");
         }
         
+        // Auto-refresh fallback (e.g. if Supabase websocket gets dropped or blocked):
+        if (window._livePeriodicSyncTimer) {
+            clearInterval(window._livePeriodicSyncTimer);
+        }
+        window._livePeriodicSyncTimer = setInterval(() => {
+            if (!document.hidden) {
+                syncFreshPostsInBackground();
+            }
+        }, 30000);
+
+        // Android Pull-to-Refresh Controller hook
+        window.AndroidController = window.AndroidController || {};
+        window.AndroidController.refreshContent = function() {
+            sessionStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(PREFETCH_KEY);
+            localStorage.removeItem(PREFETCH_TIMESTAMP_KEY);
+            loadMorePosts(true).then(() => {
+                if (window.AndroidInterface && typeof window.AndroidInterface.stopLoadingAnimation === 'function') {
+                    window.AndroidInterface.stopLoadingAnimation();
+                }
+            }).catch(() => {
+                if (window.AndroidInterface && typeof window.AndroidInterface.stopLoadingAnimation === 'function') {
+                    window.AndroidInterface.stopLoadingAnimation();
+                }
+            });
+        };
+
         const totalPostsOnScreen = document.querySelectorAll('#live-feed .live-post').length;
-        if (totalPostsOnScreen > 0) {
-            const cachedData = sessionStorage.getItem(CACHE_KEY);
-            if (cachedData) { 
-                const fullFeed = safeJSONParse(cachedData, []);
+        if (isPageReload || hasForcedQuery) {
+            loadMorePosts(true);
+        } else if (totalPostsOnScreen > 0) {
+            const cached = getFeedFromCache();
+            if (cached && Array.isArray(cached.posts)) { 
+                const fullFeed = cached.posts;
                 const loadMoreBtn = document.getElementById('load-more-btn');
                 allPosts = fullFeed.filter(p => !p.is_pinned && hasUrduTranslation(p)); 
                 
@@ -895,17 +1064,6 @@
                 } else {
                      if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'پچھلی اپڈیٹس لوڈ کریں'; }
                 }
-            } else {
-                fetchFullFeed(false).then((data) => {
-                     const loadMoreBtn = document.getElementById('load-more-btn');
-                     const urduPosts = data.filter(p => hasUrduTranslation(p));
-                     const feedCount = urduPosts.length - (urduPosts.find(p=>p.is_pinned)?1:0);
-                     if (totalPostsOnScreen >= feedCount) {
-                        if(loadMoreBtn) loadMoreBtn.style.display = 'none'; archiveBtn.style.display = 'inline-block'; noMorePostsMsg.style.display = 'block';
-                     } else {
-                        if(loadMoreBtn) { loadMoreBtn.style.display = 'inline-block'; loadMoreBtn.disabled = false; loadMoreBtn.textContent = 'پچھلی اپڈیٹس لوڈ کریں'; }
-                     }
-                });
             }
             const stuckLoader = liveFeed.querySelector('.loader');
             if (stuckLoader) stuckLoader.remove();
@@ -914,6 +1072,7 @@
                 setTimeout(() => window.scrollTo(0, parseInt(savedScroll)), 0);
             }
             setTimeout(loadSocialScripts, 100);
+            setTimeout(() => syncFreshPostsInBackground(), 50);
         } else {
             setTimeout(() => loadMorePosts(false), 100);
         }

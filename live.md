@@ -14,7 +14,7 @@ extra_js:
     <header class="live-header">
         <h1><div class="live-indicator"><div class="dot"></div></div> لائیو اپڈیٹس</h1>
     </header>
-    <div id="live-feed-persistence-wrapper" data-turbo-permanent>
+    <div id="live-feed-persistence-wrapper">
         <div id="pinned-post-container"></div>
         <div id="live-feed">
              <div class="loader"></div>

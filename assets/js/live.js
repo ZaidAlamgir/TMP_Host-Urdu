@@ -9,27 +9,80 @@
             return fallback; 
         }
     }
+    function copyLiveLink(url, btn) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => {
+                showLiveCopyFeedback(btn);
+            }).catch(() => {
+                fallbackLiveCopy(url, btn);
+            });
+        } else {
+            fallbackLiveCopy(url, btn);
+        }
+    }
+
+    function fallbackLiveCopy(url, btn) {
+        try {
+            const input = document.createElement('input');
+            input.value = url;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            showLiveCopyFeedback(btn);
+        } catch (e) {
+            prompt("Copy this link:", url);
+        }
+    }
+
+    function showLiveCopyFeedback(btn) {
+        if (!btn) return;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check mr-2 text-emerald-500"></i>Copied!';
+        btn.style.pointerEvents = 'none';
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.style.pointerEvents = 'auto';
+        }, 2000);
+    }
+
     document.addEventListener('click', function(e) {
+        // --- Live Post Share Handler ---
         const shareBtn = e.target.closest('.share-btn');
         if (shareBtn) {
-            e.preventDefault();
             const postId = shareBtn.dataset.postId;
+            // CRITICAL GUARD: Only handle share buttons belonging to live posts
+            // Regular article share buttons (e.g. #native-share-button) or buttons without a valid postId
+            // must NOT be intercepted by the live feed script!
+            if (!postId || postId === "undefined" || shareBtn.id === 'native-share-button' || !shareBtn.closest('#live-feed, #live-feed-persistence-wrapper, #pinned-post-container, .live-post')) {
+                return;
+            }
+            e.preventDefault();
             const postHeadline = shareBtn.dataset.postHeadline;
             const postUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
-            const shareText = `Live Update: ${postHeadline}`; 
+            const shareText = `Live Update: ${postHeadline || 'Live Update'}`; 
             if (window.AndroidInterface && typeof window.AndroidInterface.share === 'function') { 
-                window.AndroidInterface.share(postHeadline, shareText, postUrl); 
+                window.AndroidInterface.share(postHeadline || 'Live Update', shareText, postUrl); 
             } else if (navigator.share) { 
-                navigator.share({ title: postHeadline, text: shareText, url: postUrl }); 
+                navigator.share({ title: postHeadline || 'Live Update', text: shareText, url: postUrl }).catch(err => {
+                    if (err.name !== 'AbortError') copyLiveLink(postUrl, shareBtn);
+                }); 
             } else { 
-                alert(`Share this link:\n${postUrl}`); 
+                copyLiveLink(postUrl, shareBtn); 
             }
             return;
         }
+
+        // --- Live Post Like Handler ---
         const likeBtn = e.target.closest('.like-btn');
         if (likeBtn) {
-            e.preventDefault();
             const postId = likeBtn.dataset.postId;
+            if (!postId || postId === "undefined" || !likeBtn.closest('#live-feed, #live-feed-persistence-wrapper, #pinned-post-container, .live-post')) {
+                return;
+            }
+            e.preventDefault();
             const postIdStr = String(postId);
             const postElement = document.getElementById(`post-${postId}`);
             const likedPosts = new Set(safeJSONParse(localStorage.getItem('likedLivePosts'), []));

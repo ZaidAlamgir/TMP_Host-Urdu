@@ -225,5 +225,55 @@ permalink: /writer/
         document.head.appendChild(script);
     }
 
-    document.addEventListener('DOMContentLoaded', loadArticle);
+    function setupWriterShareButton() {
+        const shareBtn = document.getElementById('native-share-button');
+        if (shareBtn && !shareBtn.dataset.hasListener) {
+            shareBtn.dataset.hasListener = "true";
+            shareBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const shareTitle = document.title;
+                const shareText = "Read this article on TMPnews";
+                const shareUrl = window.location.href;
+                if (window.AndroidInterface && typeof window.AndroidInterface.share === 'function') {
+                    window.AndroidInterface.share(shareTitle, shareText, shareUrl);
+                } else if (navigator.share) {
+                    try {
+                        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+                    } catch (err) {
+                        if (err.name !== 'AbortError') copyWriterUrl(shareUrl, shareBtn);
+                    }
+                } else {
+                    copyWriterUrl(shareUrl, shareBtn);
+                }
+            });
+        }
+    }
+
+    async function copyWriterUrl(url, btn) {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(url);
+            } else {
+                const input = document.createElement('input');
+                input.value = url;
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+            }
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check" style="color: #10b981;"></i>';
+                setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            }
+        } catch (e) {
+            prompt("Copy this link:", url);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { loadArticle(); setupWriterShareButton(); });
+    document.addEventListener('turbo:load', () => { setupWriterShareButton(); });
 </script>

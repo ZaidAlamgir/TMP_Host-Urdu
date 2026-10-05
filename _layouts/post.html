@@ -958,7 +958,10 @@ function setupArticleInteractions() {
     if (shareBtn && !shareBtn.dataset.hasListener) {
         shareBtn.dataset.hasListener = "true"; 
         
-        shareBtn.addEventListener('click', async () => {
+        shareBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const shareTitle = document.title;
             const shareText = "Read this article on TMPnews";
             const shareUrl = window.location.href;
@@ -974,12 +977,12 @@ function setupArticleInteractions() {
                         url: shareUrl
                     });
                 } catch (err) {
-                    if (err.name !== 'AbortError') copyToClipboard(shareUrl);
+                    if (err.name !== 'AbortError') copyToClipboard(shareUrl, shareBtn);
                 }
             } 
             
             else {
-                copyToClipboard(shareUrl);
+                copyToClipboard(shareUrl, shareBtn);
             }
         });
     }
@@ -1207,10 +1210,25 @@ function setupArticleInteractions() {
     renderTelegramEmbeds();
 }
 
-async function copyToClipboard(text) {
+async function copyToClipboard(text, btnElement) {
     try {
-        await navigator.clipboard.writeText(text);
-        alert('Link copied to clipboard!');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const input = document.createElement('input');
+            input.value = text;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+        }
+        if (btnElement) {
+            const origHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-check" style="color: #10b981;"></i>';
+            setTimeout(() => { btnElement.innerHTML = origHTML; }, 2000);
+        }
     } catch (err) {
         prompt("Copy this link:", text);
     }

@@ -757,8 +757,17 @@ layout: default
                             {% assign static_author = site.authors | where: "slug", author_slug | first %}
                             
                             {% if static_author %}
+                                {% assign tick_color = "text-blue-600" %}
+                                {% case static_author.badge %}
+                                  {% when 'staff-gold' %}{% assign tick_color = "text-yellow-500" %}
+                                  {% when 'staff-red' %}{% assign tick_color = "text-red-600" %}
+                                  {% when 'expert-blue' %}{% assign tick_color = "text-blue-600" %}
+                                  {% when 'gov-silver' %}{% assign tick_color = "text-gray-400" %}
+                                  {% when 'religious-green' %}{% assign tick_color = "text-emerald-600" %}
+                                  {% when 'doctor-black' %}{% assign tick_color = "text-gray-900" %}
+                                {% endcase %}
                                 <a href="{{ static_author.url }}" rel="author" class="hover:text-indigo-600 hover:underline transition-colors font-bold text-gray-900">
-                                    {{ author_name }} <i class="fas fa-check-circle text-yellow-500 text-xs ml-1" title="Staff Writer"></i>
+                                    {{ author_name }} <i class="fas fa-check-circle {{ tick_color }} text-xs ml-1" title="Verified Author ({{ static_author.role | default: 'Contributor' }})"></i>
                                 </a>
                             {% else %}
                                 <span class="text-gray-900 font-medium">{{ author_name }}</span>

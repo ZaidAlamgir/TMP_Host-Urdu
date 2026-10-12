@@ -1,5 +1,5 @@
 title: The Urdu Post | TMP News
-description: "The Urdu Post (TMP News) - Latest Urdu News, Global Politics, Analysis and Breaking News from TMP News Agency."
+description: "دی اردو پوسٹ (TMP News): بین الاقوامی سیاست، اہم عالمی امور، بریکنگ نیوز اور تجزیات کی سب سے معتبر اردو کوریج۔ باخبر رہیے غیر جانبدار اور سچی صحافت کے ساتھ。"
 permalink: /news/:categories/:title/
 
 # Site-wide SEO keywords
@@ -40,6 +40,7 @@ include:
   - auth-callback.html
   - write.html
   - founder.html
+  - _headers
 # Exclude from processing.
 exclude:
   - .sass-cache/

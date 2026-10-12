@@ -2,7 +2,7 @@
 layout: default
 title: لائیو اپڈیٹس
 permalink: /live/
-description: "Follow the latest live updates, breaking news, and real-time coverage from TMP News."
+description: "دی اردو پوسٹ لائیو کوریج: اہم ترین عالمی واقعات، تازہ ترین پیش رفت، بریکنگ نیوز اور فوری اعلانات کی لمحہ بہ لمحہ غیر جانبدارانہ اور براہ راست اپ ڈیٹس。"
 image: /assets/images/live/TMPnewsliveBanner.webp
 extra_css:
   - /assets/style/live.css

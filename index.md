@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Home - The Urdu Post
+description: "دی اردو پوسٹ (TMP News): بین الاقوامی سیاست، اہم عالمی امور، بریکنگ نیوز اور تجزیات کی سب سے معتبر اردو کوریج۔ باخبر رہیے غیر جانبدار اور سچی صحافت کے ساتھ。"
 ---
 <script type="application/ld+json">
 {

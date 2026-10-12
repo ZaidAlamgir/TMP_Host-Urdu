@@ -14,15 +14,26 @@ jobs:
         uses: bojieyang/indexnow-action@v2
         with:
           sitemap-location: 'https://theurdupost.tmpnews.com/sitemap.xml'
-          key: ${{ secrets.INDEXNOW_KEY }}
+          key: ${{ secrets.INDEXNOW_KEY || '0d40c7a426aa46d581741c6b86598d71' }}
 
-      - name: 🔔 Ping Google Sitemap
-        run: |
-          curl -s "https://www.google.com/ping?sitemap=https://theurdupost.tmpnews.com/sitemap.xml"
-          curl -s "https://www.google.com/ping?sitemap=https://theurdupost.tmpnews.com/news-sitemap.xml"
-          echo "Google sitemap ping sent."
+      - name: 🚀 Submit news-sitemap URLs to IndexNow
+        uses: bojieyang/indexnow-action@v2
+        with:
+          sitemap-location: 'https://theurdupost.tmpnews.com/news-sitemap.xml'
+          key: ${{ secrets.INDEXNOW_KEY || '0d40c7a426aa46d581741c6b86598d71' }}
 
-      - name: 🔔 Ping Bing Sitemap
+      - name: 🚀 Direct IndexNow API Push (Bing & IndexNow Engines)
         run: |
-          curl -s "https://www.bing.com/ping?sitemap=https://theurdupost.tmpnews.com/sitemap.xml"
-          echo "Bing sitemap ping sent."
+          curl -s -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "theurdupost.tmpnews.com",
+              "key": "0d40c7a426aa46d581741c6b86598d71",
+              "keyLocation": "https://theurdupost.tmpnews.com/0d40c7a426aa46d581741c6b86598d71.txt",
+              "urlList": [
+                "https://theurdupost.tmpnews.com/",
+                "https://theurdupost.tmpnews.com/sitemap.xml",
+                "https://theurdupost.tmpnews.com/news-sitemap.xml"
+              ]
+            }'
+          echo "Direct IndexNow submission completed."

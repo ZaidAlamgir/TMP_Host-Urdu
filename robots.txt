@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
 
+User-agent: Bingbot
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
 Sitemap: https://theurdupost.tmpnews.com/sitemap.xml
 Sitemap: https://theurdupost.tmpnews.com/news-sitemap.xml

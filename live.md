@@ -22,7 +22,7 @@ extra_js:
     </div>
     <div id="feed-controls" class="text-center mt-8 px-4">
         <button id="load-more-btn" class="professional-btn" onclick="if(window.triggerLoadMoreLivePosts) window.triggerLoadMoreLivePosts(event)">پچھلی اپڈیٹس لوڈ کریں</button>
-        <a href="https://archive-live.tmpnews.com" id="archive-btn" class="professional-btn" style="display: none;">پرانی اپڈیٹس کا آرکائیو دیکھیں</a>
+        <a href="https://archive-live.tmpnews.com/?lang=ur" id="archive-btn" class="professional-btn" style="display: none;">پرانی اپڈیٹس کا آرکائیو دیکھیں</a>
         <p id="no-more-posts-msg" class="text-gray-500 font-bold py-4 uppercase text-sm" style="display: none;">لائیو کوریج مکمل ہوئی۔</p>
     </div>
 </div>

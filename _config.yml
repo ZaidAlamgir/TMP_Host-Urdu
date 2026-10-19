@@ -43,6 +43,9 @@ include:
   - _headers
 # Exclude from processing.
 exclude:
+  - archive/
+  - _archive/
+  - scripts/
   - .sass-cache/
   - .jekyll-cache/
   - gemfiles/

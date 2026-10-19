@@ -33,7 +33,15 @@ export async function onRequest(context) {
     return context.next();
   }
 
-  // 2. Cloudflare Edge Cache Match
+  // 2. Ignore reserved routes and static pages under /news/ (e.g. /news/hub/)
+  const reservedSlugs = new Set(['hub', 'index', 'feed', 'search', 'category', 'tag']);
+  if (reservedSlugs.has(cleanSlug.toLowerCase())) {
+    return context.next();
+  }
+
+  const slugWithoutDate = cleanSlug.replace(/^\d{4}-\d{2}-\d{2}-/, '');
+
+  // 3. Cloudflare Edge Cache Match
   const cacheKey = new Request(request.url, request);
   const cache = caches.default;
   const cachedResponse = await cache.match(cacheKey);
@@ -41,7 +49,7 @@ export async function onRequest(context) {
     return cachedResponse;
   }
 
-  // 3. Database Query
+  // 4. Database Query (Exact slug match only, no substring match)
   const db = env.DB_ARCHIVE || env.DB_UR || env.DB_1;
   if (!db) {
     console.error("D1 archive database binding not found");
@@ -51,8 +59,8 @@ export async function onRequest(context) {
   let post = null;
   try {
     post = await db.prepare(
-      "SELECT * FROM articles WHERE slug = ? OR slug LIKE ? LIMIT 1"
-    ).bind(cleanSlug, `%${cleanSlug}%`).first();
+      "SELECT * FROM articles WHERE slug = ? OR slug = ? LIMIT 1"
+    ).bind(cleanSlug, slugWithoutDate).first();
   } catch (err) {
     console.error("D1 query error:", err);
     return context.next();

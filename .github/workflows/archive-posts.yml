@@ -24,18 +24,21 @@ jobs:
           python-version: '3.11'
 
       - name: 3. Run Urdu Archival & D1 Sync
-        if: env.CF_API_TOKEN != '' && env.D1_DB_UR != ''
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || '81e48888678bf5f5a99fbe2e42050e8a' }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID || secrets.D1_DATABASE_ID_UR || '401a2479-db9b-4a79-a98f-593b71cbf843' }}
-          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          D1_DB_UR: ${{ secrets.D1_DATABASE_ID || secrets.D1_DATABASE_ID_UR || '401a2479-db9b-4a79-a98f-593b71cbf843' }}
         run: |
           python3 ./main_site/scripts/archive_to_d1.py \
             --repo-dir ./main_site \
             --days 60 \
             --language ur
+
+      - name: 3b. Reorganize Remote Org Category Repos (Move > 60d to archive/)
+        env:
+          GITHUB_PAT: ${{ secrets.GH_PAT_FOR_CHECKOUT || secrets.GITHUB_TOKEN }}
+        run: |
+          python3 ./main_site/scripts/reorganize_org_repos_to_archive.py --org TMPnews-urdu --days 60
 
       - name: 4. Commit and Push Archived Files
         run: |

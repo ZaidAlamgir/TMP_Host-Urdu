@@ -303,72 +303,14 @@ jobs:
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/analysis
 
-      # --- CONSOLIDATION ---
-      - name: 41. Consolidate All Posts
+      # --- CONSOLIDATION (OPTION B: LAST 60 DAYS ONLY) ---
+      - name: 41. Consolidate Active Posts (< 60 Days)
         run: |
-          echo "--- Starting Consolidation ---"
+          echo "--- Starting Option B Active Post Consolidation (< 60 Days) ---"
           mkdir -p ./main_site/_posts
-
-          # Function for standard repos (using 'posts' folder)
-          copy_posts() {
-            src="./_article_repos/$1/posts"
-            if [ -d "$src" ]; then
-              echo "Processing $1..."
-              cp -r "$src"/. ./main_site/_posts/
-            else
-              echo "Skipping $1 (No posts folder found)"
-            fi
-          }
-
-          copy_posts "world-politics"
-          copy_posts "indian-politics"
-          copy_posts "muslim-world"
-          copy_posts "technology"
-          copy_posts "medical-science"
-          copy_posts "global-economy"
-          copy_posts "art-culture"
-          copy_posts "weather"
-          copy_posts "sports"
-          copy_posts "national-news"
-          copy_posts "international-news"
-          copy_posts "history"
-          copy_posts "indian-muslims"
-          copy_posts "middle-east"
-          copy_posts "climate"
-          copy_posts "defense"
-          copy_posts "south-asia"
-          copy_posts "africa"
-          copy_posts "europe"
-          copy_posts "central-asia"
-          copy_posts "crime-alert"
-          copy_posts "south-east-asia"
-          copy_posts "east-asia"
-          copy_posts "north-america"
-          copy_posts "south-america"
-          copy_posts "war"
-          copy_posts "natural-disaster"
-          copy_posts "palestine"
-          copy_posts "strategic-deals"
-          copy_posts "speeches-press-conference"
-          copy_posts "business-economics"
-          copy_posts "space"
-          copy_posts "wild-life"
-          copy_posts "discoveries-and-inventions"
-          copy_posts "minorities"
-          copy_posts "fact-check"
-          copy_posts "analysis"
-          
-          # --- SPECIAL COPY FOR USER ARCHIVES ---
-          # (This repo uses '_posts' instead of 'posts')
-          if [ -d "./_article_repos/user-archives/_posts" ]; then
-             echo "Processing user-archives..."
-             cp -r "./_article_repos/user-archives/_posts/." ./main_site/_posts/
-          else
-             echo "Skipping user-archives (No _posts folder found yet)"
-          fi
-          
-          echo "--- Verification: Files in _posts ---"
-          ls -R ./main_site/_posts
+          python3 ./main_site/scripts/consolidate_active_posts.py --src ./_article_repos --dest ./main_site/_posts --days 60
+          echo "--- Active Posts in _posts for Jekyll build: ---"
+          ls -1 ./main_site/_posts | wc -l
       
       - name: 42. Setup Ruby
         uses: ruby/setup-ruby@v1

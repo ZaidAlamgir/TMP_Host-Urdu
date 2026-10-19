@@ -30,7 +30,7 @@ export async function onRequest(context) {
   try {
     const searchPattern = `%${query}%`;
     const sql = `
-      SELECT slug, title, subheadline, category, date, image, image_desc, tags
+      SELECT slug, title, subheadline, category, date, image, image_description, tags
       FROM articles
       WHERE title LIKE ? OR subheadline LIKE ? OR tags LIKE ?
       ORDER BY date DESC
@@ -49,7 +49,7 @@ export async function onRequest(context) {
         tags: row.tags,
         subheadline: row.subheadline || "",
         image: row.image || "",
-        image_description: row.image_desc || "",
+        image_description: row.image_description || "",
         is_archive: true
       };
     });

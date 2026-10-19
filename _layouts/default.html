@@ -7,6 +7,14 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <title>{% if page.title contains 'The Urdu Post' %}{{ page.title }}{% elsif page.title %}{{ page.title }} - The Urdu Post{% else %}{{ site.title }}{% endif %}</title>
     
+    <!-- DNS Prefetch and Resource Preconnect for Core Web Vitals (LCP) -->
+    <link rel="preconnect" href="https://assets1.tmpnews.com" crossorigin>
+    <link rel="dns-prefetch" href="https://assets1.tmpnews.com">
+    <link rel="preconnect" href="https://media.tmpnews.com" crossorigin>
+    <link rel="dns-prefetch" href="https://media.tmpnews.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
     <!-- Preload Critical LCP Images for Mobile Speed Boost -->
     {% if page.layout == 'post' and page.image %}
       <link rel="preload" href="{{ page.image }}" as="image" fetchpriority="high">

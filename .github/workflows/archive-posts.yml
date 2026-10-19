@@ -1,4 +1,4 @@
-name: Daily 24-Hour Post Archival & D1 Sync (Urdu Edition - Option B: > 60 Days)
+name: "Daily 24-Hour Post Archival and D1 Sync (Urdu)"
 
 on:
   schedule:

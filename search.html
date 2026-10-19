@@ -94,56 +94,81 @@ permalink: /search/
         const searchTerm = query.toLowerCase().trim();
         searchTermEl.textContent = `"${query}"`;
 
-        // 2. Fetch the search.json data
-        fetch('/search.json')
-            .then(response => response.json())
-            .then(posts => {
-                // 3. Filter the posts
-                const results = posts.filter(post => {
-                    const title = (post.title || '').toLowerCase();
-                    const tags = (post.tags || '').toLowerCase();
-                    const subheadline = (post.subheadline || '').toLowerCase();
-                    const content = (post.content || '').toLowerCase();
-                    
-                    return title.includes(searchTerm) || 
-                           tags.includes(searchTerm) ||
-                           subheadline.includes(searchTerm) ||
-                           content.includes(searchTerm);
-                });
+        // 2. Fetch both active search.json and historical D1 archive search concurrently
+        Promise.allSettled([
+            fetch('/search.json').then(r => r.ok ? r.json() : []),
+            fetch('/api/search?q=' + encodeURIComponent(searchTerm)).then(r => r.ok ? r.json() : { results: [] })
+        ]).then(([localRes, archiveRes]) => {
+            const localPosts = (localRes.status === 'fulfilled' && Array.isArray(localRes.value)) ? localRes.value : [];
+            const archivePosts = (archiveRes.status === 'fulfilled' && archiveRes.value && Array.isArray(archiveRes.value.results)) ? archiveRes.value.results : [];
 
-                // 4. Render the results
-                if (results.length > 0) {
-                    resultsListEl.innerHTML = ''; // Clear any old results
-                    if (noResultsEl) noResultsEl.style.display = 'none';
-                    
-                    results.forEach(post => {
-                        const postDate = new Date(post.date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        });
-                        
-                        const li = document.createElement('li');
-                        li.className = 'result-item';
-                        li.innerHTML = `
-                            <a href="${post.url}">
-                                <h2 class="result-item-title">${post.title}</h2>
-                                <p class="result-item-snippet">${post.subheadline || post.content.substring(0, 150) + '...'}</p>
-                                <p class="result-item-date">${postDate}</p>
-                            </a>
-                        `;
-                        resultsListEl.appendChild(li);
+            // Filter local active posts
+            const filteredLocal = localPosts.filter(post => {
+                const title = (post.title || '').toLowerCase();
+                const tags = (post.tags || '').toLowerCase();
+                const subheadline = (post.subheadline || '').toLowerCase();
+                const content = (post.content || '').toLowerCase();
+                return title.includes(searchTerm) || 
+                       tags.includes(searchTerm) ||
+                       subheadline.includes(searchTerm) ||
+                       content.includes(searchTerm);
+            });
+
+            // Merge & deduplicate by URL
+            const seenUrls = new Set();
+            const combinedResults = [];
+
+            for (const post of filteredLocal) {
+                const normUrl = (post.url || '').toLowerCase().replace(/\/$/, '');
+                if (normUrl && !seenUrls.has(normUrl)) {
+                    seenUrls.add(normUrl);
+                    combinedResults.push(post);
+                }
+            }
+
+            for (const post of archivePosts) {
+                const normUrl = (post.url || '').toLowerCase().replace(/\/$/, '');
+                if (normUrl && !seenUrls.has(normUrl)) {
+                    seenUrls.add(normUrl);
+                    combinedResults.push(post);
+                }
+            }
+
+            // Sort newest first
+            combinedResults.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+            // 3. Render the results
+            if (combinedResults.length > 0) {
+                resultsListEl.innerHTML = '';
+                if (noResultsEl) noResultsEl.style.display = 'none';
+
+                combinedResults.forEach(post => {
+                    const postDate = new Date(post.date).toLocaleDateString('ur-PK', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                     });
 
-                } else {
-                    // 5. Handle "No Results"
-                    if (noResultsEl) noResultsEl.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching search data:', error);
-                if (resultsListEl) resultsListEl.innerHTML = '<p style="color: red;">Could not load search results.</p>';
-            });
+                    const snippet = post.subheadline || (post.content ? post.content.substring(0, 150) + '...' : '');
+
+                    const li = document.createElement('li');
+                    li.className = 'result-item';
+                    li.innerHTML = `
+                        <a href="${post.url}">
+                            <h2 class="result-item-title">${post.title}</h2>
+                            ${snippet ? `<p class="result-item-snippet">${snippet}</p>` : ''}
+                            <p class="result-item-date">${postDate}</p>
+                        </a>
+                    `;
+                    resultsListEl.appendChild(li);
+                });
+            } else {
+                if (noResultsEl) noResultsEl.style.display = 'block';
+            }
+        }).catch(error => {
+            console.error('Error fetching search data:', error);
+            if (resultsListEl) resultsListEl.innerHTML = '<p style="color: red;">Could not load search results.</p>';
+        });
     }
 
     document.addEventListener('turbo:load', initSearchPage);

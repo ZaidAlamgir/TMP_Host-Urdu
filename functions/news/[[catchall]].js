@@ -86,7 +86,8 @@ export async function onRequest(context) {
   const authorName = (post.author || 'ٹی ایم پی عملہ').replace(/^By\s+/i, '').trim();
   const authorSlug = authorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
   const authorUrl = `${siteOrigin}/writer/?id=${authorSlug}&source=writer_db`;
-  const articleUrl = request.url;
+  const cleanPath = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+  const articleUrl = `${siteOrigin}${cleanPath}`;
   const articleCategory = post.category || category || 'خبریں';
   const categorySlug = articleCategory.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const postImage = post.image || `${siteOrigin}/android-chrome-512x512.png`;
@@ -196,7 +197,11 @@ export async function onRequest(context) {
     ]
   };
 
-  const schemaTags = `
+  const articleMetaTags = `
+    <meta property="article:published_time" content="${dateXml}">
+    <meta property="article:modified_time" content="${dateXml}">
+    <meta property="article:section" content="${escapeHtml(articleCategory)}">
+    <meta property="article:author" content="${authorUrl}">
     <script type="application/ld+json">${JSON.stringify(jsonLdArticle)}</script>
     <script type="application/ld+json">${JSON.stringify(jsonLdBreadcrumb)}</script>
   `;
@@ -205,14 +210,19 @@ export async function onRequest(context) {
   let finalHtml = templateHtml
     .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(post.title)} - دی مسلم پوسٹ</title>`)
     .replace(/<link rel="canonical"[^>]*>/i, `<link rel="canonical" href="${articleUrl}">`)
+    .replace(/<meta property="og:type"[^>]*>/i, `<meta property="og:type" content="article">`)
     .replace(/<meta property="og:title"[^>]*>/i, `<meta property="og:title" content="${escapeHtml(post.title)}">`)
     .replace(/<meta property="og:description"[^>]*>/i, `<meta property="og:description" content="${escapeHtml(cleanExcerpt)}">`)
     .replace(/<meta property="og:image"[^>]*>/i, `<meta property="og:image" content="${escapeHtml(postImage)}">`)
     .replace(/<meta property="og:url"[^>]*>/i, `<meta property="og:url" content="${articleUrl}">`)
     .replace(/<meta name="description"[^>]*>/i, `<meta name="description" content="${escapeHtml(cleanExcerpt)}">`)
+    .replace(/<meta name="twitter:title"[^>]*>/i, `<meta name="twitter:title" content="${escapeHtml(post.title)}">`)
+    .replace(/<meta name="twitter:description"[^>]*>/i, `<meta name="twitter:description" content="${escapeHtml(cleanExcerpt)}">`)
+    .replace(/<meta name="twitter:image"[^>]*>/i, `<meta name="twitter:image" content="${escapeHtml(postImage)}">`)
+    .replace(/<meta name="twitter:url"[^>]*>/i, `<meta name="twitter:url" content="${articleUrl}">`)
     .replace('REPLACE_ME_CONTENT', articleMarkup)
     .replace(/<div[^>]*id="dynamic-title-holder"[^>]*>.*?<\/div>/i, '')
-    .replace('</head>', `${schemaTags}</head>`);
+    .replace('</head>', `${articleMetaTags}</head>`);
 
   const response = new Response(finalHtml, {
     headers: {
@@ -257,7 +267,7 @@ function escapeHtml(str) {
 
 function renderMarkdown(md) {
   if (!md) return '';
-  let html = md.replace(/!\[(.*?)\]\((.*?)\)/g, '<figure class="article-figure"><img src="$2" alt="$1"><figcaption class="article-image-caption">$1</figcaption></figure>');
+  let html = md.replace(/!\[(.*?)\]\((.*?)\)/g, '<figure class="article-figure"><img src="$2" alt="$1" loading="lazy" decoding="async"><figcaption class="article-image-caption">$1</figcaption></figure>');
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>');
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');

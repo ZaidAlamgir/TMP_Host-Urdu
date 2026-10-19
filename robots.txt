@@ -12,3 +12,4 @@ Allow: /
 
 Sitemap: https://theurdupost.tmpnews.com/sitemap.xml
 Sitemap: https://theurdupost.tmpnews.com/news-sitemap.xml
+Sitemap: https://theurdupost.tmpnews.com/sitemaps/archive.xml

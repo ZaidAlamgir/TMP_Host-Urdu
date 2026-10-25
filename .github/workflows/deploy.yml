@@ -303,6 +303,23 @@ jobs:
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/analysis
 
+      # --- USER POSTS (POOLED WRITERS: 100 USERS PER REPO) ---
+      - name: 40b. Checkout User Posts (Pool 1)
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: TMPnews-urdu/user-posts
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/user-posts
+
+      - name: 40c. Checkout User Posts (Pool 2)
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: TMPnews-urdu/user-posts-02
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/user-posts-02
+
       # --- CONSOLIDATION (OPTION B: LAST 60 DAYS ONLY) ---
       - name: 41. Consolidate Active Posts (< 60 Days)
         run: |

@@ -378,12 +378,26 @@ jobs:
           # This downloads the site to a folder named '_site' in the current directory
           path: ./_site
           
-      # 3. Deploy
+      # 3. Deploy (with automatic retry for transient Cloudflare API errors)
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
+        id: deploy1
+        continue-on-error: true
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }} 
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }} 
           # Wrangler will automatically find the 'functions' folder in the root
           # and deploy it alongside the './_site' static assets
+          command: pages deploy ./_site --project-name=tmp-host-urdu
+
+      - name: Wait before retry on Cloudflare API error
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 10
+
+      - name: Deploy to Cloudflare Pages (Retry)
+        if: steps.deploy1.outcome == 'failure'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }} 
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }} 
           command: pages deploy ./_site --project-name=tmp-host-urdu

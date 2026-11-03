@@ -1,109 +1,166 @@
 ---
 layout: default
 title: News Hub
-description: "دی اردو پوسٹ نیوز حب: عالمی سیاست، بریکنگ نیوز، مشرق وسطیٰ، ٹیکنالوجی اور حالات حاضرہ کی تمام اہم خبریں اور خصوصی تجزیے ایک ہی جگہ پر ملاحظہ فرمائیں۔"
+description: "دی اردو پوسٹ نیوز ہب: اہم خبریں، سیاسی تجزیے اور عالمی حالات۔"
 permalink: /news/hub/
 ---
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@900&family=Inter:wght@400;500;600;700;800&display=swap');
-    main { 
+    main { direction: rtl; text-align: right;  
         padding: 2rem 1rem 80px 1rem; 
         max-width: 900px; 
         margin: 0 auto; 
         min-height: 80vh; 
     }
-    .page-header { text-align: center; margin-bottom: 1.5rem; }
-    .page-header h1 { font-family: 'Merriweather', serif; font-weight: 900; font-size: 2.5rem; color: #1c1e21; }
+    .page-header { text-align: center; margin-bottom: 1.25rem; }
+    .page-header h1 { 
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, serif; 
+        font-weight: 900; 
+        font-size: 1.5rem; 
+        line-height: 1.3;
+        color: #1c1e21; 
+        letter-spacing: -0.015em;
+        transition: font-size 0.2s ease;
+    }
+    .page-header h1.has-filter {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.35;
+    }
     .page-header .tag-highlight { color: #0073e6; }
-    .page-header p { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 1.1rem; color: #606770; margin-top: 0.5rem; }
+    .page-header p { font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif; font-weight: 500; font-size: 0.95rem; color: #606770; margin-top: 0.4rem; line-height: 1.45; }
+    
+    html.dark-mode .page-header h1 { color: #f8fafc; }
+    html.dark-mode .page-header p { color: #94a3b8; }
+    html.dark-mode .page-header .tag-highlight { color: #38bdf8; }
     
     /* Category Filter Tab Bar Styling */
+    .category-filters-nav-wrapper {
+        position: relative;
+        width: 100%;
+        margin-bottom: 2.25rem;
+        display: flex;
+        align-items: center;
+    }
     .category-filters-container {
         width: 100%;
-        margin-bottom: 2.5rem;
         overflow-x: auto;
+        overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 6px;
+        scroll-behavior: smooth;
+        touch-action: pan-x pinch-zoom;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x proximity;
+        user-select: none;
+        -webkit-user-select: none;
+        padding: 6px 4px 10px 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        cursor: grab;
     }
-    
-    /* Hide scrollbar on mobile devices, keep on desktop */
-    @media (max-width: 767px) {
-        .category-filters-container::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-        .category-filters-container {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
+    .category-filters-container:active {
+        cursor: grabbing;
     }
-    @media (min-width: 768px) {
-        .category-filters-container::-webkit-scrollbar {
-            height: 5px;
-        }
-        .category-filters-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .category-filters-container::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        html.dark-mode .category-filters-container::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+    .category-filters-container::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     
     .category-filters {
         display: flex;
-        gap: 1.5rem;
-        padding: 0 4px 8px 4px;
+        gap: 0.65rem;
+        padding: 0 4px;
         white-space: nowrap;
         width: max-content;
         position: relative;
     }
     
     .filter-btn {
-        background: transparent !important;
-        border: none;
+        flex-shrink: 0;
+        scroll-snap-align: center;
+        user-select: none;
+        -webkit-user-select: none;
+        background: #f1f5f9 !important;
+        border: 1px solid #e2e8f0;
         outline: none;
-        padding: 6px 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.9rem;
+        padding: 8px 18px;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif;
+        font-size: 0.875rem;
         font-weight: 600;
         color: #4b5563;
         cursor: pointer;
-        transition: color 0.2s ease;
-        border-radius: 0;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: 9999px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
     .filter-btn:hover {
-        color: #111827;
+        background: #e2e8f0 !important;
+        color: #0f172a;
+        transform: translateY(-1px);
     }
     .filter-btn.active {
-        color: #0073e6;
+        background: #0073e6 !important;
+        border-color: #0073e6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(0, 115, 230, 0.35);
+        transform: translateY(-1px);
     }
     html.dark-mode .filter-btn {
-        color: #9ca3af;
+        background: #1e293b !important;
+        border-color: #334155;
+        color: #94a3b8;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     html.dark-mode .filter-btn:hover {
+        background: #334155 !important;
         color: #ffffff;
     }
     html.dark-mode .filter-btn.active {
-        color: #0073e6;
+        background: #0073e6 !important;
+        border-color: #0073e6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 16px rgba(0, 115, 230, 0.45);
     }
 
-    /* Sliding Active Indicator Line */
-    .filter-indicator {
+
+    /* Edge Fade Masks for intuitive swipe cues */
+    .category-filters-nav-wrapper::before,
+    .category-filters-nav-wrapper::after {
+        content: '';
         position: absolute;
-        bottom: 0;
-        left: 0;
-        height: 3px;
-        background-color: #0073e6;
-        border-radius: 3px;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        top: 6px;
+        bottom: 10px;
+        width: 32px;
         pointer-events: none;
-        z-index: 1;
-        width: 0;
+        z-index: 4;
+        transition: opacity 0.25s ease;
+    }
+    .category-filters-nav-wrapper::before {
+        left: 0;
+        background: linear-gradient(to right, #ffffff 10%, transparent);
+        opacity: 0;
+        border-top-left-radius: 9999px;
+        border-bottom-left-radius: 9999px;
+    }
+    .category-filters-nav-wrapper::after {
+        right: 0;
+        background: linear-gradient(to left, #ffffff 10%, transparent);
+        opacity: 1;
+        border-top-right-radius: 9999px;
+        border-bottom-right-radius: 9999px;
+    }
+    .category-filters-nav-wrapper.can-scroll-left::before {
+        opacity: 1;
+    }
+    .category-filters-nav-wrapper.at-scroll-end::after {
+        opacity: 0;
+    }
+    html.dark-mode .category-filters-nav-wrapper::before {
+        background: linear-gradient(to right, #111827 10%, transparent);
+    }
+    html.dark-mode .category-filters-nav-wrapper::after {
+        background: linear-gradient(to left, #111827 10%, transparent);
     }
 
     .news-grid-full { 
@@ -159,7 +216,7 @@ permalink: /news/hub/
         bottom: 12px;
         left: 16px;
         z-index: 2;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif;
         font-size: 0.75rem;
         font-weight: 700;
         color: #ffffff;
@@ -168,7 +225,7 @@ permalink: /news/hub/
         margin: 0;
     }
     .news-card-headline {
-        font-family: 'Merriweather', serif; font-weight: 900;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, serif; font-weight: 900;
         font-size: 1.2rem; 
         color: #1c1e21;
         margin-bottom: 0.5rem; line-height: 1.35;
@@ -191,7 +248,7 @@ permalink: /news/hub/
         background: linear-gradient(to bottom, rgba(31,41,55,0), #1f2937);
     }
     .news-card-subheadline {
-        font-family: 'Inter', sans-serif; font-weight: 400;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif; font-weight: 400;
         font-size: 0.95rem; color: #606770; line-height: 1.5;
         margin: 0;
     }
@@ -204,7 +261,7 @@ permalink: /news/hub/
     html.dark-mode .news-card-subheadline { color: #9ca3af; }
     
     .read-more-text {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif;
         font-size: 0.85rem;
         font-weight: 800;
         color: #0073e6; 
@@ -233,7 +290,7 @@ permalink: /news/hub/
         border: none;
         padding: 12px 28px;
         border-radius: 25px;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
@@ -242,6 +299,10 @@ permalink: /news/hub/
     }
     .load-more-btn:active { transform: scale(0.97); }
     @media (min-width: 768px) {
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h1 { font-size: 2.25rem; }
+        .page-header h1.has-filter { font-size: 1.75rem; }
+        .page-header p { font-size: 1.1rem; }
         .news-card { flex-direction: row; }
         .news-card .news-card-image-wrapper { width: 300px; height: auto; flex-shrink: 0; }
         .news-card-text { display: flex; flex-direction: column; justify-content: center; }
@@ -250,52 +311,53 @@ permalink: /news/hub/
 </style>
 <main>
     <div class="page-header">
-        <h1 id="page-title">نیوز ہب</h1>
-        <p id="page-subtitle">دنیا بھر کے اہم ترین واقعات، تحقیق اور بامقصد مباحثے۔</p>
+        <h1 id="page-title">News Hub</h1>
+        <p id="page-subtitle">The latest trends, research, and important discussions from around the world.</p>
     </div>
 
-    <!-- Category Filter Buttons -->
-    <div class="category-filters-container">
-        <div class="category-filters" id="filters-bar">
-            <div class="filter-indicator" id="filter-indicator"></div>
-            <button class="filter-btn active" data-tag="">تمام</button>
-            <button class="filter-btn" data-tag="world-politics">عالمی سیاست</button>
-            <button class="filter-btn" data-tag="indian-politics">ہندوستانی سیاست</button>
-            <button class="filter-btn" data-tag="muslim-world">مسلم دنیا</button>
-            <button class="filter-btn" data-tag="technology">ٹیکنالوجی</button>
-            <button class="filter-btn" data-tag="medical-science">طبی سائنس</button>
-            <button class="filter-btn" data-tag="global-economy">عالمی معیشت</button>
-            <button class="filter-btn" data-tag="art-culture">فن و ثقافت</button>
-            <button class="filter-btn" data-tag="weather">موسم</button>
-            <button class="filter-btn" data-tag="sports">کھیل</button>
-            <button class="filter-btn" data-tag="national-news">قومی خبریں</button>
-            <button class="filter-btn" data-tag="international-news">بین الاقوامی</button>
-            <button class="filter-btn" data-tag="history">تاریخ</button>
-            <button class="filter-btn" data-tag="indian-muslims">ہندوستانی مسلمان</button>
-            <button class="filter-btn" data-tag="middle-east">مشرق وسطیٰ</button>
-            <button class="filter-btn" data-tag="climate">ماحولیات</button>
-            <button class="filter-btn" data-tag="defense">دفاع</button>
-            <button class="filter-btn" data-tag="south-asia">جنوبی ایشیا</button>
-            <button class="filter-btn" data-tag="africa">افریقہ</button>
-            <button class="filter-btn" data-tag="europe">یورپ</button>
-            <button class="filter-btn" data-tag="central-asia">وسطی ایشیا</button>
-            <button class="filter-btn" data-tag="crime-alert">کرائم الرٹ</button>
-            <button class="filter-btn" data-tag="south-east-asia">جنوب مشرقی ایشیا</button>
-            <button class="filter-btn" data-tag="east-asia">مشرقی ایشیا</button>
-            <button class="filter-btn" data-tag="north-america">شمالی امریکہ</button>
-            <button class="filter-btn" data-tag="south-america">جنوبی امریکہ</button>
-            <button class="filter-btn" data-tag="war">جنگ و تنازعات</button>
-            <button class="filter-btn" data-tag="natural-disaster">قدرتی آفات</button>
-            <button class="filter-btn" data-tag="palestine">فلسطین</button>
-            <button class="filter-btn" data-tag="strategic-deals">اسٹریٹجک معاہدے</button>
-            <button class="filter-btn" data-tag="speeches-press-conference">خطابات، پریس کانفرنس و انٹرویوز</button>
-            <button class="filter-btn" data-tag="business-economics">کاروبار و معیشت</button>
-            <button class="filter-btn" data-tag="space">خلائی تحقیق</button>
-            <button class="filter-btn" data-tag="wild-life">جنگلی حیات</button>
-            <button class="filter-btn" data-tag="discoveries-and-inventions">دریافتیں اور ایجادات</button>
-            <button class="filter-btn" data-tag="minorities">اقلیتیں</button>
-            <button class="filter-btn" data-tag="fact-check">حقائق کی جانچ</button>
-            <button class="filter-btn" data-tag="analysis">تجزیہ</button>
+    <!-- Category Filter Buttons with Smooth Touch/Drag Navigation -->
+    <div class="category-filters-nav-wrapper" id="filters-nav-wrapper">
+        <div class="category-filters-container" id="filters-container">
+            <div class="category-filters" id="filters-bar">
+                <button class="filter-btn active" data-tag="">All</button>
+                <button class="filter-btn" data-tag="world-politics">World Politics</button>
+                <button class="filter-btn" data-tag="indian-politics">Indian Politics</button>
+                <button class="filter-btn" data-tag="muslim-world">Muslim World</button>
+                <button class="filter-btn" data-tag="technology">Technology</button>
+                <button class="filter-btn" data-tag="medical-science">Medical Science</button>
+                <button class="filter-btn" data-tag="global-economy">Global Economy</button>
+                <button class="filter-btn" data-tag="art-culture">Art & Culture</button>
+                <button class="filter-btn" data-tag="weather">Weather</button>
+                <button class="filter-btn" data-tag="sports">Sports</button>
+                <button class="filter-btn" data-tag="national-news">National News</button>
+                <button class="filter-btn" data-tag="international-news">International News</button>
+                <button class="filter-btn" data-tag="history">History</button>
+                <button class="filter-btn" data-tag="indian-muslims">Indian Muslims</button>
+                <button class="filter-btn" data-tag="middle-east">Middle East</button>
+                <button class="filter-btn" data-tag="climate">Climate</button>
+                <button class="filter-btn" data-tag="defense">Defense</button>
+                <button class="filter-btn" data-tag="south-asia">South Asia</button>
+                <button class="filter-btn" data-tag="africa">Africa</button>
+                <button class="filter-btn" data-tag="europe">Europe</button>
+                <button class="filter-btn" data-tag="central-asia">Central Asia</button>
+                <button class="filter-btn" data-tag="crime-alert">Crime Alert</button>
+                <button class="filter-btn" data-tag="south-east-asia">Southeast Asia</button>
+                <button class="filter-btn" data-tag="east-asia">East Asia</button>
+                <button class="filter-btn" data-tag="north-america">North America</button>
+                <button class="filter-btn" data-tag="south-america">South America</button>
+                <button class="filter-btn" data-tag="war">War</button>
+                <button class="filter-btn" data-tag="natural-disaster">Natural Disaster</button>
+                <button class="filter-btn" data-tag="palestine">Palestine</button>
+                <button class="filter-btn" data-tag="strategic-deals">Strategic Deals</button>
+                <button class="filter-btn" data-tag="speeches-press-conference">Speeches, Press Conference & Interviews</button>
+                <button class="filter-btn" data-tag="business-economics">Business & Economics</button>
+                <button class="filter-btn" data-tag="space">Space</button>
+                <button class="filter-btn" data-tag="wild-life">Wildlife</button>
+                <button class="filter-btn" data-tag="discoveries-and-inventions">Discoveries & Inventions</button>
+                <button class="filter-btn" data-tag="minorities">Minorities</button>
+                <button class="filter-btn" data-tag="fact-check">Fact Check</button>
+                <button class="filter-btn" data-tag="analysis">Analysis</button>
+            </div>
         </div>
     </div>
 
@@ -311,7 +373,7 @@ permalink: /news/hub/
                 <div class="subheadline-container">
                     <p class="news-card-subheadline">{{ post.subheadline | default: post.content | strip_html | truncatewords: 30 }}</p>
                 </div>
-                <span class="read-more-text">مزید پڑھیں &larr;</span>
+                <span class="read-more-text">مزید پڑھیں &rarr;</span>
             </div>
         </a>
         {% endfor %}
@@ -319,7 +381,7 @@ permalink: /news/hub/
     <div id="loader" class="loader"></div>
     <p id="no-results-message" class="no-results-message"></p>
     <div id="load-more-container" class="load-more-container">
-        <button id="load-more-btn" class="load-more-btn">مزید خبریں دیکھیں</button>
+        <button id="load-more-btn" class="load-more-btn">Load More News</button>
     </div>
 </main>
 <script>
@@ -351,43 +413,9 @@ permalink: /news/hub/
             }
         });
         
-        const TAG_MAP = {
-            'world-politics': 'عالمی سیاست',
-            'indian-politics': 'ہندوستانی سیاست',
-            'muslim-world': 'مسلم دنیا',
-            'technology': 'ٹیکنالوجی',
-            'medical-science': 'طبی سائنس',
-            'global-economy': 'عالمی معیشت',
-            'art-culture': 'فن و ثقافت',
-            'weather': 'موسم',
-            'sports': 'کھیل',
-            'national-news': 'قومی خبریں',
-            'international-news': 'بین الاقوامی',
-            'history': 'تاریخ',
-            'indian-muslims': 'ہندوستانی مسلمان',
-            'middle-east': 'مشرق وسطیٰ',
-            'climate': 'ماحولیات',
-            'defense': 'دفاع',
-            'south-asia': 'جنوبی ایشیا',
-            'africa': 'افریقہ',
-            'europe': 'یورپ',
-            'central-asia': 'وسطی ایشیا',
-            'crime-alert': 'کرائم الرٹ',
-            'south-east-asia': 'جنوب مشرقی ایشیا',
-            'east-asia': 'مشرقی ایشیا',
-            'north-america': 'شمالی امریکہ',
-            'south-america': 'جنوبی امریکہ',
-            'war': 'جنگ و تنازعات',
-            'natural-disaster': 'قدرتی آفات',
-            'palestine': 'فلسطین',
-            'strategic-deals': 'اسٹریٹجک معاہدے',
-            'speeches-press-conference': 'خطابات و پریس کانفرنس',
-            'business-economics': 'کاروبار و معیشت'
-        };
-
         function formatTag(tag) {
-            if (!tag) return '';
-            return TAG_MAP[tag] || tag.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            if (tag === 'art-culture') return 'Art & Culture';
+            return tag.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
         
         function filterArticles(articles, tag) {
@@ -398,14 +426,33 @@ permalink: /news/hub/
             });
         }
         
+        function getNewsHubSkeletonHTML(count = 4) {
+            let html = '<div class="skeleton-fade-wrapper" id="news-hub-skeleton-wrapper" style="display:flex;flex-direction:column;gap:1.5rem;width:100%;grid-column:1/-1;">';
+            for (let i = 0; i < count; i++) {
+                html += `
+                <div class="skeleton-hub-card">
+                    <div class="skeleton-shimmer-box skeleton-hub-img"></div>
+                    <div class="skeleton-hub-body">
+                        <div class="skeleton-shimmer-box skeleton-line-title" style="width: 85%; height: 20px; margin-bottom: 10px;"></div>
+                        <div class="skeleton-shimmer-box skeleton-line-title-short" style="width: 60%; height: 20px; margin-bottom: 14px;"></div>
+                        <div class="skeleton-shimmer-box skeleton-line-desc" style="width: 95%;"></div>
+                        <div class="skeleton-shimmer-box skeleton-line-desc-short" style="width: 70%; margin-bottom: 16px;"></div>
+                        <div class="skeleton-shimmer-box skeleton-pill-sm" style="width: 90px; height: 16px;"></div>
+                    </div>
+                </div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
         function buildCardsHTML(articlesToRender, shouldAnimate) {
             if (!articlesToRender || articlesToRender.length === 0) return '';
             
             return articlesToRender.map(post => {
                 const image = post.image || 'https://placehold.co/600x400/e2e8f0/64748b?text=No+Image';
                 const alt = post.image_description || 'Article image';
-                const subheadline = post.subheadline || 'مکمل خبر پڑھنے کے لیے کلک کریں۔';
-                const animClass = shouldAnimate ? 'fade-in' : '';
+                const subheadline = post.subheadline || 'Click to read more.';
+                const animClass = shouldAnimate ? 'fade-in content-fade-in' : '';
                 let formattedDate = '';
                 if (post.date) {
                     const d = new Date(post.date);
@@ -429,15 +476,6 @@ permalink: /news/hub/
             }).join('');
         }
         
-        function updateIndicator(activeBtn) {
-            const indicator = document.getElementById('filter-indicator');
-            if (!indicator || !activeBtn) return;
-            const rect = activeBtn.getBoundingClientRect();
-            const leftOffset = activeBtn.offsetLeft;
-            indicator.style.width = `${rect.width}px`;
-            indicator.style.transform = `translateX(${leftOffset}px)`;
-        }
-
         function syncActiveFilterButton() {
             const urlParams = new URLSearchParams(window.location.search);
             const tagFilter = urlParams.get('tag') || '';
@@ -453,13 +491,70 @@ permalink: /news/hub/
                     }
                 });
                 if (activeBtn) {
-                    // Position indicator and scroll tab into view if overflowed
                     setTimeout(() => {
-                        updateIndicator(activeBtn);
                         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }, 50);
                 }
             }
+        }
+
+        // --- Smooth Kinetic Drag & Swipe Navigation for Category Filter Bar ---
+        const filtersContainer = document.getElementById('filters-container');
+        const filtersNavWrapper = document.getElementById('filters-nav-wrapper');
+
+        function updateFilterScrollState() {
+            if (!filtersContainer || !filtersNavWrapper) return;
+            const scrollLeft = filtersContainer.scrollLeft;
+            const maxScroll = filtersContainer.scrollWidth - filtersContainer.clientWidth;
+            const canScrollLeft = scrollLeft > 10;
+            const canScrollRight = scrollLeft < maxScroll - 10;
+
+            filtersNavWrapper.classList.toggle('can-scroll-left', canScrollLeft);
+            filtersNavWrapper.classList.toggle('at-scroll-end', !canScrollRight);
+        }
+
+        if (filtersContainer && !filtersContainer._scrollListenersAttached) {
+            filtersContainer._scrollListenersAttached = true;
+            filtersContainer.addEventListener('scroll', updateFilterScrollState, { passive: true });
+            window.addEventListener('resize', updateFilterScrollState, { passive: true });
+            setTimeout(updateFilterScrollState, 100);
+
+            // Drag-to-Scroll (Mouse and Touch gesture acceleration)
+            let isDown = false;
+            let startX;
+            let scrollLeftStart;
+            let moved = false;
+
+            filtersContainer.addEventListener('mousedown', (e) => {
+                isDown = true;
+                moved = false;
+                startX = e.pageX - filtersContainer.offsetLeft;
+                scrollLeftStart = filtersContainer.scrollLeft;
+                filtersContainer.style.scrollBehavior = 'auto'; // Instant response during drag
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                const x = e.pageX - filtersContainer.offsetLeft;
+                const walk = (x - startX) * 1.4;
+                if (Math.abs(walk) > 4) moved = true;
+                filtersContainer.scrollLeft = scrollLeftStart - walk;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDown) return;
+                isDown = false;
+                filtersContainer.style.scrollBehavior = 'smooth';
+                setTimeout(() => { moved = false; }, 50);
+            });
+
+            // Prevent button click if user was dragging
+            filtersContainer.addEventListener('click', (e) => {
+                if (moved) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
         }
 
         function updateUI(articles, animate = false) {
@@ -469,10 +564,12 @@ permalink: /news/hub/
             syncActiveFilterButton();
 
             if (tagFilter) {
-                pageTitle.innerHTML = `خبریں: <span class="tag-highlight">${formatTag(tagFilter)}</span>`;
+                pageTitle.innerHTML = `<span class="tag-highlight">${formatTag(tagFilter)}</span> کی خبریں`;
+                pageTitle.classList.add('has-filter');
                 if(pageSubtitle) pageSubtitle.style.display = 'none';
             } else {
                 pageTitle.innerHTML = 'نیوز ہب';
+                pageTitle.classList.remove('has-filter');
                 if(pageSubtitle) pageSubtitle.style.display = 'block';
             }
             
@@ -480,7 +577,7 @@ permalink: /news/hub/
             
             if (currentFilteredArticles.length === 0) {
                 grid.innerHTML = '';
-                noResultsMsg.textContent = tagFilter ? `"${formatTag(tagFilter)}" زمرے میں کوئی خبر نہیں ملی۔` : "کوئی خبر دستیاب نہیں ہے۔";
+                noResultsMsg.textContent = tagFilter ? `No articles found for "${formatTag(tagFilter)}".` : "کوئی خبر نہیں ملی۔";
                 noResultsMsg.style.display = 'block';
                 if(loadMoreContainer) loadMoreContainer.style.display = 'none';
                 return;
@@ -549,6 +646,8 @@ permalink: /news/hub/
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 if (cachedData) {
                     updateUI(JSON.parse(cachedData), true);
+                } else {
+                    grid.innerHTML = getNewsHubSkeletonHTML(4);
                 }
             });
             filtersBar._listenerAttached = true;
@@ -566,10 +665,9 @@ permalink: /news/hub/
             window._popstateListenerAttached = true;
         }
 
-        // Listen for window resize to adjust indicator positioning
+        // Listen for window resize to adjust scroll buttons and filter positioning
         window.addEventListener('resize', () => {
-            const activeBtn = filtersBar ? filtersBar.querySelector('.filter-btn.active') : null;
-            if (activeBtn) updateIndicator(activeBtn);
+            updateFilterScrollState();
         });
 
         if (loadMoreBtn && !loadMoreBtn._listenerAttached) {
@@ -587,6 +685,9 @@ permalink: /news/hub/
         }
         
         const cachedData = localStorage.getItem(CACHE_KEY);
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialTag = urlParams.get('tag');
+
         if (cachedData) {
             try {
                 const articles = JSON.parse(cachedData);
@@ -594,8 +695,8 @@ permalink: /news/hub/
             } catch (e) {
                 localStorage.removeItem(CACHE_KEY);
             }
-        } else {
-            if(loader) loader.classList.add('visible');
+        } else if (initialTag) {
+            grid.innerHTML = getNewsHubSkeletonHTML(4);
         }
         
         setTimeout(async () => {
@@ -609,11 +710,27 @@ permalink: /news/hub/
                 const isNewContent = !cachedData || 
                                      freshArticles.length !== cachedArticles.length || 
                                      (freshArticles[0] && cachedArticles[0] && freshArticles[0].url !== cachedArticles[0].url);
+                
+                const skeletonWrapper = document.getElementById('news-hub-skeleton-wrapper');
                 if (isNewContent) {
                     localStorage.setItem(CACHE_KEY, JSON.stringify(freshArticles));
-                    updateUI(freshArticles, true);
-                } else if (grid.childElementCount === 0) {
-                    updateUI(freshArticles, false);
+                    if (skeletonWrapper) {
+                        skeletonWrapper.classList.add('fade-out');
+                        setTimeout(() => {
+                            updateUI(freshArticles, true);
+                        }, 180);
+                    } else {
+                        updateUI(freshArticles, true);
+                    }
+                } else if (skeletonWrapper || grid.childElementCount === 0) {
+                    if (skeletonWrapper) {
+                        skeletonWrapper.classList.add('fade-out');
+                        setTimeout(() => {
+                            updateUI(freshArticles, true);
+                        }, 180);
+                    } else {
+                        updateUI(freshArticles, false);
+                    }
                 }
             } catch (error) {
                 console.error("Background update failed:", error);

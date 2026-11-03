@@ -1,22 +1,48 @@
 ---
 layout: default
-title: Loading Latest Article...
+title: تازہ ترین - The Urdu Post
 permalink: /latest.html
 ---
 
 {% assign latest = site.posts.first %}
 
+<div class="skeleton-article-page" style="direction: rtl; text-align: right;">
+    <div class="skeleton-article-meta-row" style="flex-direction: row-reverse;">
+        <div class="skeleton-shimmer-box" style="height: 22px; width: 110px; border-radius: 9999px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 16px; width: 90px; border-radius: 4px;"></div>
+    </div>
+    
+    <div class="skeleton-shimmer-box" style="height: 34px; width: 92%; margin-bottom: 12px; border-radius: 6px;"></div>
+    <div class="skeleton-shimmer-box" style="height: 34px; width: 70%; margin-bottom: 20px; border-radius: 6px;"></div>
+    
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-direction: row-reverse;">
+        <div class="skeleton-shimmer-box" style="width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;"></div>
+        <div style="flex-grow: 1; text-align: right;">
+            <div class="skeleton-shimmer-box" style="height: 14px; width: 130px; margin-bottom: 6px; border-radius: 4px; margin-left: auto;"></div>
+            <div class="skeleton-shimmer-box" style="height: 12px; width: 85px; border-radius: 3px; margin-left: auto;"></div>
+        </div>
+    </div>
+
+    <div class="skeleton-shimmer-box skeleton-article-hero-img"></div>
+
+    <div style="margin-top: 1.5rem;">
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 100%; margin-bottom: 10px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 98%; margin-bottom: 10px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 95%; margin-bottom: 10px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 78%; margin-bottom: 20px; border-radius: 4px;"></div>
+        
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 100%; margin-bottom: 10px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 92%; margin-bottom: 10px; border-radius: 4px;"></div>
+        <div class="skeleton-shimmer-box" style="height: 14px; width: 85%; border-radius: 4px;"></div>
+    </div>
+</div>
+
 <script>
     (function() {
-        // Jekyll automatically injects the real URL of your newest article here
         const latestUrl = "{{ latest.url | relative_url }}";
-        
-        // Execute the redirect seamlessly using Hotwire Turbo
         if (typeof Turbo !== 'undefined') {
-            // Trigger instantly (no delay needed since there is no middle UI to render)
             Turbo.visit(latestUrl, { action: "replace" });
         } else {
-            // Fallback for browsers with JavaScript issues
             window.location.replace(latestUrl);
         }
     })();

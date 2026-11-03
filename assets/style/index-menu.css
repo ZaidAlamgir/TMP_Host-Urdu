@@ -22,7 +22,7 @@
     width: 100%;
     height: 100%;
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    stroke: #111827; /* Default dark color */
+    stroke: #000000; /* Default black color */
 }
 
 #index-close-icon {
@@ -37,7 +37,7 @@
 .index-menu-button.active #index-close-icon {
     opacity: 1;
     transform: rotate(0deg) scale(1);
-    stroke: #111827 !important;
+    stroke: #000000 !important;
 }
 
 /* Body & HTML Scroll Lock when Menu is open */

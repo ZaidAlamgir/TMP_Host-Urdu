@@ -96,6 +96,9 @@ layout: default
         word-wrap: break-word; 
         direction: rtl; 
         text-align: right; 
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
     }
     @media (min-width: 768px) { 
         .article-headline { 
@@ -457,15 +460,50 @@ layout: default
     .article-figure img { max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 8px; }
     .article-body > p > img:only-child, .article-body > img { max-width: 100%; height: auto; display: block; margin: 2rem auto; border-radius: 8px; }
     
+    /* Featured Image & Media Caption (Editorial Style with Theme Blue Accent - RTL) */
     .article-image-caption { 
-        font-family: 'Inter', sans-serif; 
-        font-size: 14px; 
-        color: #6b7280; 
-        margin-top: 0.5rem; 
-        margin-bottom: 0.75rem !important; 
-        text-align: center; 
-        display: block; 
-        line-height: 1.25 !important; 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        font-size: 0.82rem; 
+        font-weight: 600; 
+        line-height: 1.4; 
+        color: #475569; 
+        background: #f1f5f9; 
+        border-right: 3.5px solid #2563eb; 
+        border-left: none;
+        padding: 5px 12px; 
+        border-radius: 6px 0 0 6px; 
+        margin: 8px 0 16px 0 !important; 
+        text-align: right; 
+        direction: rtl;
+        display: inline-block; 
+        max-width: 100%; 
+        box-sizing: border-box; 
+        letter-spacing: 0.01em; 
+    }
+
+    .article-image-caption::before {
+        content: "\f030";
+        font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-left: 7px;
+        margin-right: 0;
+        color: #2563eb;
+        font-size: 0.76rem;
+        opacity: 0.95;
+    }
+
+    .article-image-caption:empty {
+        display: none !important;
+    }
+
+    html.dark-mode .article-image-caption {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+        border-right-color: #38bdf8 !important;
+    }
+
+    html.dark-mode .article-image-caption::before {
+        color: #38bdf8 !important;
     }
 
     /* ========================================================

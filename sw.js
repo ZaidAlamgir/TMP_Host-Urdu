@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v35';
-const ARTICLE_CACHE = 'tmp-articles-v35';
-const ASSET_CACHE = 'tmp-assets-v35';
+const CORE_CACHE = 'tmp-core-v36';
+const ARTICLE_CACHE = 'tmp-articles-v36';
+const ASSET_CACHE = 'tmp-assets-v36';
 const CORE_ASSETS = [
     '/',                      
     '/index.html',            
@@ -37,7 +37,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); 
     event.waitUntil(
         caches.open(CORE_CACHE).then(async (cache) => {
-            console.log('SW: Caching Core App Shell v35');
+            console.log('SW: Caching Core App Shell v36');
             for (let asset of CORE_ASSETS) {
                 try {
                     const response = await fetch(asset);
@@ -95,8 +95,12 @@ self.addEventListener('fetch', (event) => {
         return; 
     }
 
-    // Live script Network-First strategy
-    if (url.pathname.includes('/assets/js/live.js')) {
+    // Live scripts & live styles Network-First strategy
+    if (
+        url.pathname.includes('/assets/js/live.js') ||
+        url.pathname.includes('/assets/bottom-nav.js') ||
+        url.pathname.includes('/assets/style/live.css')
+    ) {
         event.respondWith(
             fetch(request).then((networkResponse) => {
                 if (networkResponse && networkResponse.ok) {

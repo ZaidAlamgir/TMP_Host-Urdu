@@ -9,6 +9,153 @@
             return fallback; 
         }
     }
+
+    // --- Unified Liked State Management (Unique Star Design + Guaranteed User Confirmation) ---
+    const LIKE_TITLES = {
+        liked: 'اسٹار کیا گیا (اسٹار ختم کرنے کے لیے کلک کریں)',
+        unliked: 'اس اپ ڈیٹ کو اسٹار کریں'
+    };
+
+    function getOrCreateClientId() {
+        let cid = localStorage.getItem('anonClientId');
+        if (!cid) {
+            cid = 'anon-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+            try { localStorage.setItem('anonClientId', cid); } catch(e) {}
+        }
+        return cid;
+    }
+
+    function getLikedPostIds() {
+        return new Set(safeJSONParse(localStorage.getItem('likedLivePosts'), []).map(String));
+    }
+
+    function isPostLiked(postId) {
+        if (!postId && postId !== 0) return false;
+        return getLikedPostIds().has(String(postId));
+    }
+
+    function setPostLiked(postId, liked) {
+        if (!postId && postId !== 0) return;
+        const idStr = String(postId);
+        const set = getLikedPostIds();
+        if (liked) {
+            set.add(idStr);
+        } else {
+            set.delete(idStr);
+        }
+        try {
+            localStorage.setItem('likedLivePosts', JSON.stringify(Array.from(set)));
+        } catch(e) {}
+    }
+
+    window._userLikedPostsPending = window._userLikedPostsPending || new Map();
+
+    function calculateDisplayLikes(postId, serverCount) {
+        serverCount = (typeof serverCount === 'number' && !isNaN(serverCount)) ? serverCount : 0;
+        const idStr = String(postId);
+        const isLiked = isPostLiked(idStr);
+        const pending = window._userLikedPostsPending ? window._userLikedPostsPending.get(idStr) : null;
+
+        if (pending) {
+            if (pending.liked) {
+                if (serverCount <= pending.baseServer) {
+                    return pending.baseServer + 1;
+                }
+                return serverCount;
+            } else {
+                if (serverCount >= pending.baseServer && pending.baseServer > 0) {
+                    return Math.max(0, serverCount - 1);
+                }
+                return serverCount;
+            }
+        }
+
+        // If user already liked this post in localStorage, count must never drop to 0
+        if (isLiked && serverCount === 0) {
+            return 1;
+        }
+        return serverCount;
+    }
+
+    function updateAllLikeButtonsForPost(postId, isLiked, newCount) {
+        const idStr = String(postId);
+        const btns = document.querySelectorAll(`.like-btn[data-post-id="${idStr}"]`);
+        btns.forEach(btn => {
+            if (isLiked) {
+                btn.classList.add('is-liked');
+                btn.setAttribute('title', LIKE_TITLES.liked);
+                btn.setAttribute('aria-label', LIKE_TITLES.liked);
+                btn.setAttribute('aria-pressed', 'true');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fa-solid fa-star';
+                }
+            } else {
+                btn.classList.remove('is-liked');
+                btn.setAttribute('title', LIKE_TITLES.unliked);
+                btn.setAttribute('aria-label', LIKE_TITLES.unliked);
+                btn.setAttribute('aria-pressed', 'false');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fa-regular fa-star';
+                }
+            }
+            const countSpan = btn.querySelector('.like-count');
+            if (countSpan && typeof newCount === 'number') {
+                countSpan.textContent = newCount;
+            }
+        });
+
+        const separateSpans = document.querySelectorAll(`[id="like-count-${idStr}"]`);
+        separateSpans.forEach(span => {
+            if (typeof newCount === 'number') {
+                span.textContent = newCount;
+            }
+        });
+    }
+
+    function sendLikePing(url) {
+        if (navigator.sendBeacon) {
+            try {
+                const blob = new Blob([], { type: 'text/plain' });
+                if (navigator.sendBeacon(url, blob)) return;
+            } catch(e) {}
+        }
+        fetch(url, { method: 'POST', cache: 'no-store', keepalive: true }).catch(() => {
+            fetch(url, { method: 'GET', cache: 'no-store', keepalive: true }).catch(() => {});
+        });
+    }
+
+    function updateCachedFeedPostLikes(postId, newCount) {
+        const idStr = String(postId);
+        try {
+            if (window._cachedLiveFeedObj) {
+                const posts = Array.isArray(window._cachedLiveFeedObj)
+                    ? window._cachedLiveFeedObj
+                    : (window._cachedLiveFeedObj.posts || []);
+                const post = posts.find(p => String(p.id) === idStr);
+                if (post) {
+                    post.like_count = newCount;
+                }
+            }
+            const cacheKeys = ['cachedLiveFeed_en_v8', 'cachedLiveFeed_hi_v8', 'cachedLiveFeed_ur_v8'];
+            for (const key of cacheKeys) {
+                const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
+                if (raw) {
+                    const parsed = safeJSONParse(raw, null);
+                    if (parsed && Array.isArray(parsed.posts)) {
+                        const post = parsed.posts.find(p => String(p.id) === idStr);
+                        if (post) {
+                            post.like_count = newCount;
+                            const updated = JSON.stringify(parsed);
+                            sessionStorage.setItem(key, updated);
+                            localStorage.setItem(key, updated);
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+    }
     function copyLiveLink(url, btn) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(() => {
@@ -155,7 +302,7 @@
             return;
         }
 
-        // --- Live Post Like Handler (Instant Optimistic UI + Background Fire-and-Forget) ---
+        // --- Live Post Like Handler (Instant Optimistic UI + Guaranteed User Confirmation + Robust Counting) ---
         const likeBtn = e.target.closest('.like-btn');
         if (likeBtn) {
             const postId = likeBtn.dataset.postId;
@@ -166,69 +313,49 @@
             e.stopPropagation();
 
             const postIdStr = String(postId);
-            const likedPosts = new Set(safeJSONParse(localStorage.getItem('likedLivePosts'), []));
-            const isCurrentlyLiked = likedPosts.has(postIdStr);
+            const isCurrentlyLiked = isPostLiked(postIdStr);
             const isNowLiked = !isCurrentlyLiked;
 
-            // 1. Instant optimistic visual state toggle
-            if (isNowLiked) {
-                likeBtn.classList.add('is-liked');
-                likedPosts.add(postIdStr);
-            } else {
-                likeBtn.classList.remove('is-liked');
-                likedPosts.delete(postIdStr);
-            }
+            // 1. Calculate new count instantly based on current UI display
+            const likeCountSpan = likeBtn.querySelector('.like-count') || document.getElementById(`like-count-${postIdStr}`);
+            const currentCount = likeCountSpan ? (parseInt(likeCountSpan.textContent.replace(/,/g, '')) || 0) : 0;
+            const newCount = isNowLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
 
-            // 2. Immediate tactile pop animation
+            // 2. Persist user liked state in localStorage immediately
+            setPostLiked(postIdStr, isNowLiked);
+
+            // 3. Record pending state for intelligent server reconciliation
+            window._userLikedPostsPending = window._userLikedPostsPending || new Map();
+            window._userLikedPostsPending.set(postIdStr, {
+                liked: isNowLiked,
+                baseServer: currentCount,
+                timestamp: Date.now()
+            });
+
+            // 4. Update ALL matching buttons & counts across the entire page (pinned card + regular feed)
+            updateAllLikeButtonsForPost(postIdStr, isNowLiked, newCount);
+
+            // 5. Tactile pop animations
             likeBtn.classList.remove('animate-pop');
             void likeBtn.offsetWidth;
             likeBtn.classList.add('animate-pop');
 
-            // 3. Immediately persist user preference in localStorage
-            localStorage.setItem('likedLivePosts', JSON.stringify(Array.from(likedPosts)));
-
-            // 4. Update like count INSTANTLY on user UI without waiting for animations or timer
-            const likeCountSpan = likeBtn.querySelector('.like-count') || document.getElementById(`like-count-${postId}`);
             if (likeCountSpan) {
-                const currentCount = parseInt(likeCountSpan.textContent.replace(/,/g, '')) || 0;
-                const newCount = isNowLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
-                likeCountSpan.textContent = newCount;
                 likeCountSpan.classList.remove('count-pop');
                 void likeCountSpan.offsetWidth;
                 likeCountSpan.classList.add('count-pop');
-
-                if (window._optimisticLikeDeltas) {
-                    window._optimisticLikeDeltas.set(postIdStr, isNowLiked ? 1 : 0);
-                }
             }
 
-            // 5. Update cached post in-memory if present
-            try {
-                if (window._cachedLiveFeedObj && Array.isArray(window._cachedLiveFeedObj.posts)) {
-                    const postInCache = window._cachedLiveFeedObj.posts.find(p => String(p.id) === postIdStr);
-                    if (postInCache) {
-                        const currentL = postInCache.like_count || 0;
-                        postInCache.like_count = isNowLiked ? currentL + 1 : Math.max(0, currentL - 1);
-                        if (typeof saveFeedToCache === 'function') {
-                            saveFeedToCache(window._cachedLiveFeedObj.posts);
-                        }
-                    }
-                }
-            } catch(e) {}
+            // 6. Update cached feed in memory / storage so tab swapping retains exact count
+            updateCachedFeedPostLikes(postIdStr, newCount);
 
-            // 6. Background async sync to worker (Fire-and-forget, never blocking UI)
+            // 7. Background async sync to worker (Fire-and-forget, never blocking UI)
             const action = isNowLiked ? 'increment' : 'decrement';
             const ANALYTICS_WRITE_URL = 'https://data.tmpnews.com/feed.json';
-            const clientId = localStorage.getItem('anonClientId') || 'anon-' + Math.random().toString(36).substring(2, 10);
-            const endpoint = `${ANALYTICS_WRITE_URL}?log=like&post_id=${postId}&action=${action}&client_id=${clientId}`;
-            
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(endpoint);
-            } else {
-                fetch(endpoint, { method: 'GET', cache: 'no-store', keepalive: true }).catch(err => {
-                    console.warn("Background like ping notice:", err.message);
-                });
-            }
+            const clientId = getOrCreateClientId();
+            const endpoint = `${ANALYTICS_WRITE_URL}?log=like&post_id=${postIdStr}&action=${action}&client_id=${clientId}`;
+
+            sendLikePing(endpoint);
             return;
         }
     });
@@ -847,13 +974,8 @@
             const formattedFullDate = !isNaN(dateObj.getTime()) ? dateObj.toLocaleString('ur-PK', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }) : '';
             const relativeTime = formatRelativeTime(postData.timestamp) || formattedFullDate;
             const initialViewCount = postData.view_count || 0;
-            const isAlreadyLiked = likedPosts.has(String(postData.id));
-            let initialLikeCount = postData.like_count || 0;
-            if (window._optimisticLikeDeltas && window._optimisticLikeDeltas.has(String(postData.id))) {
-                initialLikeCount = Math.max(0, initialLikeCount + window._optimisticLikeDeltas.get(String(postData.id)));
-            } else if (isAlreadyLiked && initialLikeCount === 0) {
-                initialLikeCount = 1;
-            }
+            const isAlreadyLiked = isPostLiked(postData.id);
+            const initialLikeCount = calculateDisplayLikes(postData.id, postData.like_count);
 
             let tagsList = Array.isArray(postData.tags)
                 ? postData.tags
@@ -865,7 +987,10 @@
             
             const progressBarHTML = `<div class="processing-text app-only-feature" style="display: none !important;">Downloading model & translating...</div><div class="translation-progress-container app-only-feature" style="display: none !important;"><div class="translation-progress-bar"></div></div>`;
             const translationButtonsHTML = `<div class="live-translation-controls app-only-feature" style="display: none !important;"><button class="translate-chip-btn hindi" onclick="requestLivePostTranslation('${postData.id}', 'hi')">Hindi</button><button class="translate-chip-btn" onclick="requestLivePostTranslation('${postData.id}', 'ur')">Urdu</button></div>`;
-            const likeBtnClass = isAlreadyLiked ? "like-btn is-liked" : "like-btn";
+            const likeBtnClass = isAlreadyLiked ? "like-btn inshot-pill-btn inshot-like-btn is-liked" : "like-btn inshot-pill-btn inshot-like-btn";
+            const starIconClass = isAlreadyLiked ? "fa-solid fa-star" : "fa-regular fa-star";
+            const likeTitle = isAlreadyLiked ? LIKE_TITLES.liked : LIKE_TITLES.unliked;
+            const ariaPressed = isAlreadyLiked ? "true" : "false";
 
             const headlineHTML = postHeadline ? `<h2 class="live-post-headline inshot-card-headline">${postHeadline}</h2>` : '';
             const bodyHTML = postContent ? `<div class="post-body inshot-card-body">${parseContent(postContent)}</div>` : '';
@@ -892,8 +1017,8 @@
                 ${tagsHTML}${progressBarHTML}${translationButtonsHTML}
                 <div class="post-footer inshot-card-footer">
                     <div class="post-stats inshot-stats-pills" data-post-id="${postData.id}">
-                        <button class="${likeBtnClass} inshot-pill-btn inshot-like-btn" data-post-id="${postData.id}" title="Star this update">
-                            <i class="fas fa-star"></i>
+                        <button class="${likeBtnClass}" data-post-id="${postData.id}" title="${likeTitle}" aria-label="${likeTitle}" aria-pressed="${ariaPressed}">
+                            <i class="${starIconClass}"></i>
                             <span id="like-count-${postData.id}" class="like-count inshot-count">${initialLikeCount}</span>
                         </button>
                         <div class="inshot-pill-btn inshot-view-pill" title="Total views">
@@ -920,7 +1045,7 @@
                 const likeCountSpan = document.getElementById(`like-count-${postData.id}`);
                 const viewCountSpan = document.getElementById(`view-count-${postData.id}`);
                 if (!animatedPosts.has(postData.id)) {
-                    if (likeCountSpan && !likedPosts.has(String(postData.id)) && (!window._optimisticLikeDeltas || !window._optimisticLikeDeltas.has(String(postData.id)))) {
+                    if (likeCountSpan && !isPostLiked(postData.id)) {
                         if (initialLikeCount > 0) animateCountUp(likeCountSpan, 0, initialLikeCount);
                     }
                     if (viewCountSpan && initialViewCount > 0) {
@@ -1053,15 +1178,15 @@
                     }
                 }
 
-                // 3. In-place stats sync (respects user's optimistic likes)
+                // 3. In-place stats sync (respects user's optimistic likes & keeps visual confirmation accurate)
                 for (const p of freshUrdu) {
-                    const likeSpan = document.getElementById(`like-count-${p.id}`);
+                    const postIdStr = String(p.id);
+                    const isLiked = isPostLiked(postIdStr);
+                    const finalLikes = calculateDisplayLikes(postIdStr, p.like_count);
+
+                    updateAllLikeButtonsForPost(postIdStr, isLiked, finalLikes);
+
                     const viewSpan = document.getElementById(`view-count-${p.id}`);
-                    if (likeSpan && typeof p.like_count === 'number') {
-                        const delta = window._optimisticLikeDeltas ? (window._optimisticLikeDeltas.get(String(p.id)) || 0) : 0;
-                        const finalCount = Math.max(0, p.like_count + delta);
-                        likeSpan.textContent = finalCount;
-                    }
                     if (viewSpan && typeof p.view_count === 'number') {
                         viewSpan.textContent = p.view_count;
                     }
@@ -1389,12 +1514,10 @@
                                 const viewCountSpan = existingElement.querySelector(`#view-count-${newPostData.id}`);
                                 
                                 if (likeCountSpan) {
-                                    const delta = window._optimisticLikeDeltas ? (window._optimisticLikeDeltas.get(String(newPostData.id)) || 0) : 0;
-                                    const finalLikes = Math.max(0, newPostData.like_count + delta);
-                                    const currentLikes = parseInt(likeCountSpan.textContent.replace(/,/g, '')) || 0;
-                                    if (finalLikes !== currentLikes) {
-                                        animateCountUp(likeCountSpan, currentLikes, finalLikes);
-                                    }
+                                    const postIdStr = String(newPostData.id);
+                                    const isLiked = isPostLiked(postIdStr);
+                                    const finalLikes = calculateDisplayLikes(postIdStr, newPostData.like_count);
+                                    updateAllLikeButtonsForPost(postIdStr, isLiked, finalLikes);
                                 }
                                 if (viewCountSpan) {
                                     const currentViews = parseInt(viewCountSpan.textContent.replace(/,/g, '')) || 0;

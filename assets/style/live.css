@@ -473,23 +473,29 @@ body {
     font-weight: 700;
 }
 
-/* Star/Like Button (Tactile Optimistic UI) */
+/* Like Button (Tactile Optimistic UI + Star Outline/Solid Confirmation) */
 .like-btn {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
     user-select: none;
-    transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .like-btn:active { 
     transform: scale(0.92) !important; 
 }
 
+.like-btn i {
+    font-size: 0.85rem;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
+}
+
 .like-btn.is-liked { 
     color: #e11d48 !important; 
     background: #ffe4e6 !important;
     border-color: #fecdd3 !important;
+    box-shadow: 0 1px 3px rgba(225, 29, 72, 0.15);
 }
 
 .like-btn.is-liked i { 
@@ -1099,9 +1105,10 @@ html.dark-mode .inshot-pill-btn:hover {
 }
 
 html.dark-mode .like-btn.is-liked { 
-    background: rgba(225, 29, 72, 0.2) !important;
-    border-color: rgba(225, 29, 72, 0.4) !important;
+    background: rgba(225, 29, 72, 0.22) !important;
+    border-color: rgba(225, 29, 72, 0.45) !important;
     color: #fda4af !important;
+    box-shadow: 0 1px 4px rgba(225, 29, 72, 0.25);
 }
 
 html.dark-mode .like-btn.is-liked i {

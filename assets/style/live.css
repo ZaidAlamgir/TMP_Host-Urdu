@@ -473,13 +473,19 @@ body {
     font-weight: 700;
 }
 
-/* Like Button (Tactile Optimistic UI + Star Outline/Solid Confirmation) */
+/* Like Button (Unique Star Design: Gold/Amber Liked State + Smooth Pop) */
 .like-btn {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
     user-select: none;
+    -webkit-user-select: none;
     transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.like-btn i,
+.like-btn .like-count {
+    pointer-events: none;
 }
 
 .like-btn:active { 
@@ -487,20 +493,20 @@ body {
 }
 
 .like-btn i {
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
 }
 
 .like-btn.is-liked { 
-    color: #e11d48 !important; 
-    background: #ffe4e6 !important;
-    border-color: #fecdd3 !important;
-    box-shadow: 0 1px 3px rgba(225, 29, 72, 0.15);
+    color: #b45309 !important; 
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 1px 4px rgba(245, 158, 11, 0.25);
 }
 
 .like-btn.is-liked i { 
     font-weight: 900; 
-    color: #e11d48 !important;
+    color: #d97706 !important;
 }
 
 .like-btn.animate-pop.is-liked i {
@@ -515,7 +521,7 @@ body {
 
 @keyframes count-pop {
     0% { transform: scale(1); }
-    40% { transform: scale(1.25); color: #e11d48; }
+    40% { transform: scale(1.25); color: #d97706; }
     100% { transform: scale(1); }
 }
 
@@ -941,9 +947,10 @@ html.dark-mode .live-post.aljazeera-slide-down.is-expanded .inshot-card-inner {
         gap: 0.3rem;
     }
     .inshot-pill-btn {
-        padding: 4px 10px;
-        font-size: 0.76rem;
-        gap: 0.28rem;
+        padding: 6px 12px;
+        min-height: 34px;
+        font-size: 0.78rem;
+        gap: 0.32rem;
     }
     /* Mobile Timeline Connector Alignment */
     .live-post:not(:last-child)::after, .skeleton-post:not(:last-child)::after {
@@ -1105,14 +1112,14 @@ html.dark-mode .inshot-pill-btn:hover {
 }
 
 html.dark-mode .like-btn.is-liked { 
-    background: rgba(225, 29, 72, 0.22) !important;
-    border-color: rgba(225, 29, 72, 0.45) !important;
-    color: #fda4af !important;
-    box-shadow: 0 1px 4px rgba(225, 29, 72, 0.25);
+    background: rgba(245, 158, 11, 0.22) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    color: #fde047 !important;
+    box-shadow: 0 1px 6px rgba(251, 191, 36, 0.3);
 }
 
 html.dark-mode .like-btn.is-liked i {
-    color: #fb7185 !important;
+    color: #fbbf24 !important;
 }
 
 html.dark-mode .inshot-load-btn {

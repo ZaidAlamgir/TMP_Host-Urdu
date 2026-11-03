@@ -81,23 +81,30 @@
         const idStr = String(postId);
         const btns = document.querySelectorAll(`.like-btn[data-post-id="${idStr}"]`);
         btns.forEach(btn => {
+            btn.setAttribute('data-liked', isLiked ? 'true' : 'false');
             if (isLiked) {
                 btn.classList.add('is-liked');
                 btn.setAttribute('title', LIKE_TITLES.liked);
                 btn.setAttribute('aria-label', LIKE_TITLES.liked);
                 btn.setAttribute('aria-pressed', 'true');
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fa-solid fa-star';
-                }
             } else {
                 btn.classList.remove('is-liked');
                 btn.setAttribute('title', LIKE_TITLES.unliked);
                 btn.setAttribute('aria-label', LIKE_TITLES.unliked);
                 btn.setAttribute('aria-pressed', 'false');
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fa-regular fa-star';
+            }
+            const icon = btn.querySelector('i, svg');
+            if (icon) {
+                if (icon.tagName.toLowerCase() === 'svg') {
+                    if (isLiked) {
+                        icon.classList.remove('fa-regular');
+                        icon.classList.add('fa-solid');
+                    } else {
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                    }
+                } else {
+                    icon.className = isLiked ? 'fa-solid fa-star' : 'fa-regular fa-star';
                 }
             }
             const countSpan = btn.querySelector('.like-count');
@@ -305,6 +312,15 @@
         // --- Live Post Like Handler (Instant Optimistic UI + Guaranteed User Confirmation + Robust Counting) ---
         const likeBtn = e.target.closest('.like-btn');
         if (likeBtn) {
+            const now = Date.now();
+            window._lastLikeTapTime = window._lastLikeTapTime || 0;
+            if (now - window._lastLikeTapTime < 280) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            window._lastLikeTapTime = now;
+
             const postId = likeBtn.dataset.postId;
             if (!postId || postId === "undefined" || !likeBtn.closest('#live-feed, #live-feed-persistence-wrapper, #pinned-post-container, .live-post')) {
                 return;

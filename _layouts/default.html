@@ -215,7 +215,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Load FontAwesome and Supabase asynchronously/deferred to prevent render blocking -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <!-- Load FontAwesome directly so icons and star buttons always render immediately on mobile & PWA -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <style>
         html {
@@ -411,13 +412,103 @@
     </script>
     <script>
       if ('serviceWorker' in navigator) {
+        let swRegistration = null;
+        let isRefreshing = false;
+
+        // Auto-refresh when new Service Worker takes control to ensure latest updates
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!isRefreshing) {
+            isRefreshing = true;
+            console.log('[SW] New Service Worker active! Reloading page to apply updates...');
+            // Invalidate stale localStorage and sessionStorage caches
+            try {
+              Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('postsCache_') || key.startsWith('tmp_feed_') || key.startsWith('cachedLiveFeed_') || key.startsWith('prefetchedLiveFeed_')) {
+                  localStorage.removeItem(key);
+                }
+              });
+              sessionStorage.clear();
+            } catch (e) {}
+            window.location.reload();
+          }
+        });
+
+        // Listen for direct broadcast messages from sw.js
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'SW_ACTIVATED') {
+            console.log('[SW] Cache updated to version:', event.data.version);
+            try {
+              Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('postsCache_') || key.startsWith('cachedLiveFeed_') || key.startsWith('prefetchedLiveFeed_')) {
+                  localStorage.removeItem(key);
+                }
+              });
+              sessionStorage.clear();
+            } catch (e) {}
+          }
+        });
+
+        function setupActiveUpdateChecks(registration) {
+          swRegistration = registration;
+
+          function triggerUpdate() {
+            if (registration && typeof registration.update === 'function') {
+              registration.update().catch(err => {
+                console.warn('[SW] Update check error:', err);
+              });
+            }
+          }
+
+          // If a new worker is waiting, immediately instruct it to activate
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          // When an update is detected, activate it as soon as it installs
+          registration.addEventListener('updatefound', () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+              installingWorker.addEventListener('statechange', () => {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    console.log('[SW] New update found and ready! Activating...');
+                    installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                  } else {
+                    console.log('[SW] App Shell pre-cached for offline browsing.');
+                  }
+                }
+              });
+            }
+          });
+
+          // 1. Initial check right after registration
+          triggerUpdate();
+
+          // 2. Active check when user focuses the tab or returns to app
+          window.addEventListener('focus', triggerUpdate);
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              triggerUpdate();
+            }
+          });
+
+          // 3. Active check on Turbo / Turbolinks page navigations
+          document.addEventListener('turbo:load', triggerUpdate);
+          document.addEventListener('turbolinks:load', triggerUpdate);
+
+          // 4. Periodic background update check every 60 seconds
+          setInterval(triggerUpdate, 60000);
+        }
+
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          // updateViaCache: 'none' bypasses HTTP caching for sw.js to always fetch fresh from server
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
             .then((registration) => {
-              console.log('Service Worker registered successfully with scope: ', registration.scope);
+              console.log('[SW] Service Worker registered with scope:', registration.scope);
+              setupActiveUpdateChecks(registration);
             })
             .catch((error) => {
-              console.log('Service Worker registration failed: ', error);
+              console.warn('[SW] Registration failed:', error);
             });
         });
       }

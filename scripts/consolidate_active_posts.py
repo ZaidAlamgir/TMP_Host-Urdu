@@ -40,6 +40,19 @@ def extract_article_date(file_path):
 
     return None
 
+def sanitize_and_copy(src_path, dest_path):
+    try:
+        with open(src_path, 'r', encoding='utf-8', errors='replace') as f:
+            content = f.read()
+        # Strip forbidden C1 control characters (\u0080-\u009F) that crash Ruby Psych
+        clean_content = re.sub(r'[\x80-\x9f]', '', content)
+        # Strip leaked translation markers
+        clean_content = re.sub(r'===+TITLE===+|==+TITLE==+', '', clean_content)
+        with open(dest_path, 'w', encoding='utf-8') as f:
+            f.write(clean_content)
+    except Exception:
+        shutil.copy2(src_path, dest_path)
+
 def main():
     parser = argparse.ArgumentParser(description="Filter and consolidate active posts (< 60 days)")
     parser.add_argument("--src", default="./_article_repos", help="Path to checked out article repos")
@@ -79,8 +92,8 @@ def main():
             target_file = os.path.join(args.dest, fname)
 
             if article_date is None or article_date >= cutoff_date:
-                # Active post: copy to _posts for Jekyll compilation
-                shutil.copy2(file_path, target_file)
+                # Active post: sanitize and copy to _posts for Jekyll compilation
+                sanitize_and_copy(file_path, target_file)
                 copied += 1
             else:
                 # Older than 60 days: skip (served by D1 Edge Function)

@@ -1,0 +1,395 @@
+<!-- TMP News Live Intelligence & Election Top Bar (Dynamic & Offline-Resilient) -->
+<div id="tmp-live-top-widget" class="tmp-live-top-container" style="display: none;" aria-hidden="true">
+    <div class="tmp-live-top-inner">
+        <!-- Live Indicator & Title -->
+        <div class="tmp-live-header-row">
+            <div class="tmp-live-badge-box">
+                <span class="tmp-live-pill">
+                    <span class="tmp-live-dot"></span> LIVE
+                </span>
+                <span id="tmp-live-event-title" class="tmp-live-title">Assembly Elections 2026</span>
+            </div>
+            <div class="tmp-live-tally-summary" id="tmp-live-tally-summary">
+                <!-- Tally text: NDA: 354 | INDIA: 174 | Others: 296 -->
+            </div>
+        </div>
+
+        <!-- Alliance / Party Visual Breakdown Bar -->
+        <div id="tmp-live-bar-track" class="tmp-live-bar-track">
+            <!-- Dynamic segments injected here -->
+        </div>
+
+        <!-- Live Breaking Ticker / Milestone & Link -->
+        <div class="tmp-live-ticker-row">
+            <div class="tmp-live-ticker-content">
+                <span class="tmp-live-ticker-tag"><i class="fas fa-bolt"></i> LATEST:</span>
+                <span id="tmp-live-ticker-text" class="tmp-live-ticker-text">Counting underway across assembly constituencies...</span>
+            </div>
+            <a id="tmp-live-action-btn" href="/live/" class="tmp-live-action-btn">
+                <span>Live Feed</span> <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* --- TMP Live Top Widget Styling --- */
+.tmp-live-top-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 1.25rem auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tmp-live-top-inner {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #ef4444;
+    border-radius: 14px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tmp-live-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tmp-live-badge-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tmp-live-pill {
+    background-color: #ef4444;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.tmp-live-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: tmpLivePulse 1.4s infinite ease-in-out;
+}
+
+@keyframes tmpLivePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.85); }
+}
+
+.tmp-live-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.tmp-live-tally-summary {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    font-family: monospace, sans-serif;
+    letter-spacing: 0.02em;
+}
+
+/* Visual Proportion Tally Bar */
+.tmp-live-bar-track {
+    width: 100%;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.tmp-live-bar-segment {
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+/* Live Ticker Row */
+.tmp-live-ticker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 4px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.tmp-live-ticker-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.tmp-live-ticker-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #ef4444;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.tmp-live-ticker-text {
+    font-size: 0.82rem;
+    color: #334155;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.25s ease;
+}
+
+.tmp-live-action-btn {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0284c7;
+    background: #e0f2fe;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tmp-live-action-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+}
+
+/* --- Dark Mode Styles --- */
+html.dark-mode .tmp-live-top-inner {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-color: #334155;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+html.dark-mode .tmp-live-title {
+    color: #f8fafc;
+}
+
+html.dark-mode .tmp-live-tally-summary {
+    color: #cbd5e1;
+}
+
+html.dark-mode .tmp-live-bar-track {
+    background-color: #334155;
+}
+
+html.dark-mode .tmp-live-ticker-row {
+    border-top-color: #334155;
+}
+
+html.dark-mode .tmp-live-ticker-text {
+    color: #94a3b8;
+}
+
+html.dark-mode .tmp-live-action-btn {
+    background: rgba(2, 132, 199, 0.25);
+    color: #38bdf8;
+}
+
+html.dark-mode .tmp-live-action-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+    .tmp-live-top-container {
+        padding: 0 0.5rem;
+        margin-bottom: 0.85rem;
+    }
+    .tmp-live-top-inner {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+    .tmp-live-title {
+        font-size: 0.85rem;
+    }
+    .tmp-live-tally-summary {
+        font-size: 0.75rem;
+    }
+    .tmp-live-ticker-text {
+        font-size: 0.75rem;
+    }
+}
+</style>
+
+<script>
+(function() {
+    // Endpoints: checks local backend server first, falls back to production API
+    const BASE_URLS = [
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'https://api.tmpnews.com'
+    ];
+
+    const widget = document.getElementById('tmp-live-top-widget');
+    const titleEl = document.getElementById('tmp-live-event-title');
+    const tallyEl = document.getElementById('tmp-live-tally-summary');
+    const barTrack = document.getElementById('tmp-live-bar-track');
+    const tickerText = document.getElementById('tmp-live-ticker-text');
+    
+    if (!widget) return;
+
+    let activeBaseUrl = null;
+    let milestoneList = [];
+    let milestoneIdx = 0;
+    let rotateInterval = null;
+
+    // 1. Probe server status with strict timeout (1500ms)
+    async function probeServer() {
+        for (const base of BASE_URLS) {
+            try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 1500);
+                const res = await fetch(`${base}/api/status`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+                clearTimeout(timer);
+                if (res.ok) {
+                    const statusData = await res.json();
+                    if (statusData && statusData.server_alive) {
+                        activeBaseUrl = base;
+                        return statusData;
+                    }
+                }
+            } catch (err) {
+                // Server down or unreachable, continue checking next
+            }
+        }
+        return null;
+    }
+
+    // 2. Fetch live election ticker & milestones
+    async function loadLiveContent(statusData) {
+        if (!activeBaseUrl) return;
+
+        try {
+            // Fetch Ticker Summary
+            const tickerRes = await fetch(`${activeBaseUrl}/api/election-update/ticker`);
+            if (tickerRes.ok) {
+                const tickerData = await tickerRes.json();
+                renderTicker(tickerData);
+            }
+
+            // Fetch Milestones
+            const msRes = await fetch(`${activeBaseUrl}/api/election-update/live-updates?limit=6`);
+            if (msRes.ok) {
+                milestoneList = await msRes.json();
+                startMilestoneRotation();
+            }
+
+            // Reveal widget smoothly
+            widget.style.display = 'block';
+            widget.setAttribute('aria-hidden', 'false');
+        } catch (e) {
+            console.warn('[TMP Live Widget] Error loading live content:', e);
+            // If error, keep hidden
+            widget.style.display = 'none';
+        }
+    }
+
+    function renderTicker(data) {
+        if (!data) return;
+        if (titleEl && data.event_title) titleEl.textContent = data.event_title;
+        if (tallyEl && data.tally_summary) tallyEl.textContent = data.tally_summary;
+
+        // Render Tally Progress Bar
+        if (barTrack && data.top_alliances && Array.isArray(data.top_alliances)) {
+            barTrack.innerHTML = '';
+            const totalDeclared = data.top_alliances.reduce((sum, a) => sum + (a.total || 0), 0) || 1;
+            
+            const allianceColorMap = {
+                'NDA': '#F97316',
+                'INDIA': '#3B82F6',
+                'TVK': '#BE185D',
+                'SPA': '#CA8A04',
+                'LDF': '#DC2626',
+                'UDF': '#10B981',
+                'Others': '#9CA3AF'
+            };
+
+            data.top_alliances.forEach(al => {
+                const seg = document.createElement('div');
+                seg.className = 'tmp-live-bar-segment';
+                const pct = ((al.total / totalDeclared) * 100).toFixed(1);
+                seg.style.width = `${pct}%`;
+                seg.style.backgroundColor = al.color || allianceColorMap[al.name] || '#9CA3AF';
+                seg.title = `${al.name}: ${al.total} (${pct}%)`;
+                barTrack.appendChild(seg);
+            });
+        }
+    }
+
+    function startMilestoneRotation() {
+        if (!tickerText || !milestoneList || milestoneList.length === 0) return;
+        if (rotateInterval) clearInterval(rotateInterval);
+
+        function showNext() {
+            if (milestoneList.length === 0) return;
+            const item = milestoneList[milestoneIdx % milestoneList.length];
+            tickerText.style.opacity = '0';
+            setTimeout(() => {
+                tickerText.textContent = item.message;
+                tickerText.style.opacity = '1';
+            }, 200);
+            milestoneIdx++;
+        }
+
+        showNext();
+        rotateInterval = setInterval(showNext, 4500);
+    }
+
+    // Initialize Probe
+    probeServer().then(statusData => {
+        if (statusData && (statusData.election?.active || statusData.football_score?.active)) {
+            loadLiveContent(statusData);
+            // Periodic background refresh every 30s
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    loadLiveContent(statusData);
+                }
+            }, 30000);
+        } else {
+            // Server offline or no live event active -> Ensure widget is cleanly hidden
+            widget.style.display = 'none';
+        }
+    }).catch(() => {
+        widget.style.display = 'none';
+    });
+})();
+</script>

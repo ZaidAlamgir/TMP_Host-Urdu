@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v39';
-const ARTICLE_CACHE = 'tmp-articles-v39';
-const ASSET_CACHE = 'tmp-assets-v39';
+const CORE_CACHE = 'tmp-core-v40';
+const ARTICLE_CACHE = 'tmp-articles-v40';
+const ASSET_CACHE = 'tmp-assets-v40';
 const CORE_ASSETS = [
     '/offline.html',  
     'https://author.tmpnews.com/profile/tmpnews.webp',     
@@ -56,7 +56,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); 
     event.waitUntil(
         caches.open(CORE_CACHE).then(async (cache) => {
-            console.log('SW: Caching Core App Shell v39');
+            console.log('SW: Caching Core App Shell v40');
             for (let asset of CORE_ASSETS) {
                 try {
                     const response = await fetch(asset, { cache: 'reload' });

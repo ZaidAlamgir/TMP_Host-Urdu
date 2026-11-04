@@ -218,6 +218,8 @@ html.dark-mode .subheadline-container::after {
 }
 </style>
 
+{% include live-top-widget.html %}
+
 <div class="support-cta-banner">
     <p>آزاد اور غیر جانبدار صحافت آج کے دور میں پہلے سے زیادہ ضروری ہے۔ دی اردو پوسٹ کا تعاون کریں۔</p>
     <a href="{{ '/support/' | relative_url }}" class="support-cta-button">تعاون کریں</a>

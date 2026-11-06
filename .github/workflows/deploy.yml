@@ -320,6 +320,16 @@ jobs:
           token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
           path: ./_article_repos/user-posts-02
 
+      # --- INFOLENS CHECKOUT ---
+      - name: 40d. Checkout InfoLens SVG Infographics (Urdu)
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: TMPnews-urdu/tmp-articles-infolens
+          token: ${{ secrets.GH_PAT_FOR_CHECKOUT }}
+          path: ./_article_repos/infolens
+          fetch-depth: 1
+
       # --- CONSOLIDATION (OPTION B: LAST 60 DAYS ONLY) ---
       - name: 41. Consolidate Active Posts (< 60 Days)
         run: |
@@ -328,6 +338,11 @@ jobs:
           python3 ./main_site/scripts/consolidate_active_posts.py --src ./_article_repos --dest ./main_site/_posts --days 60
           echo "--- Active Posts in _posts for Jekyll build: ---"
           ls -1 ./main_site/_posts | wc -l
+
+      - name: 41b. Consolidate InfoLens SVG Infographics (< 60 Days)
+        run: |
+          echo "--- Consolidating Urdu InfoLens SVG Infographics ---"
+          python3 ./main_site/scripts/consolidate_infolens.py --src ./_article_repos/infolens/posts --dest-json ./main_site/infolens.json --dest-site-json ./main_site/_site/infolens.json --days 60
       
       - name: 42. Setup Ruby
         uses: ruby/setup-ruby@v1

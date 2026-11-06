@@ -100,6 +100,10 @@
         if (window.initLiveFeed && document.getElementById('live-feed')) {
             window.initLiveFeed();
         }
+        // ALWAYS wake up the infolens page if needed
+        if (window.initInfolensPage && document.getElementById('infolens-app')) {
+            window.initInfolensPage();
+        }
 
         // NEW FIX: If Android App handles it natively, stop it and SKIP the web loader!
         if (window.AndroidInterface && window.AndroidInterface.stopLoadingAnimation) {
@@ -161,12 +165,22 @@
 
         let matchFound = false;
 
+        // Article pages -> Mapped to Home tab
         const isArticlePage = currentPath.startsWith('/news/') && !currentPath.startsWith('/news/hub');
         
         if (isArticlePage) {
-            const latestTab = document.getElementById('nav-articles') || document.querySelector(`${CONFIG.linkSelector}[href*="latest"]`);
-            if (latestTab) {
-                latestTab.classList.add(CONFIG.activeClass);
+            const homeTab = document.getElementById('nav-home') || document.querySelector(`${CONFIG.linkSelector}[href="/"]`);
+            if (homeTab) {
+                homeTab.classList.add(CONFIG.activeClass);
+                matchFound = true;
+            }
+        }
+
+        // InfoLens page
+        if (!matchFound && (currentPath === '/infolens' || currentPath.startsWith('/infolens'))) {
+            const infolensTab = document.getElementById('nav-infolens') || document.querySelector(`${CONFIG.linkSelector}[href*="infolens"]`);
+            if (infolensTab) {
+                infolensTab.classList.add(CONFIG.activeClass);
                 matchFound = true;
             }
         }
@@ -421,17 +435,13 @@
         highlightActiveLink();
         completeLoader();
 
-        const latestUrl = document.body.getAttribute('data-latest-post-url');
-        if (latestUrl) {
-            const navArticles = document.getElementById('nav-articles');
-            if (navArticles && !navArticles.href.includes(latestUrl)) {
-                navArticles.href = latestUrl;
-            }
-        }
-        
         const homeGrid = document.getElementById('home-articles-grid');
         if (homeGrid) {
             initHomepageArticles(homeGrid);
+        }
+
+        if (window.initInfolensPage && document.getElementById('infolens-app')) {
+            window.initInfolensPage();
         }
     }
 

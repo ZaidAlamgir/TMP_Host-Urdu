@@ -1,0 +1,143 @@
+---
+layout: default
+title: انفولینس - بصری صحافت اور انفوگرافکس - دی اردو پوسٹ
+description: "دی اردو پوسٹ انفولینس: جغرافیائی سیاسی انفوگرافکس، معاشی اعداد و شمار، دفاعی تجزیات اور تفتیشی خاکوں کا اعلیٰ ریزولوشن ویکٹر بصری مرکز۔"
+permalink: /infolens/
+extra_css:
+  - /assets/style/infolens.css
+extra_js:
+  - /assets/js/infolens.js
+---
+
+<div id="infolens-app" class="infolens-page" dir="rtl">
+    <!-- 1. Top Bar: "TMP INFOLENS" Brand on Start + Search Bar on Same Line -->
+    <header class="infolens-topbar">
+        <div class="infolens-pill-badge">
+            <span class="pulse-lens-dot"></span>
+            <span>دی اردو پوسٹ انفولینس</span>
+        </div>
+        
+        <!-- Search Input on Same Row -->
+        <div class="infolens-search-wrapper">
+            <i class="fas fa-search infolens-search-icon"></i>
+            <input type="text" id="infolens-search" class="infolens-search-input" placeholder="انفوگرافکس، اعداد و شمار، ممالک تلاش کریں..." autocomplete="off">
+            <button id="infolens-search-clear" class="infolens-search-clear" title="تلاش صاف کریں">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. Category Explore Bar (Pinterest style) -->
+    <nav class="infolens-categories-nav" aria-label="انفوگرافکس زمرہ جات">
+        <div id="infolens-categories" class="infolens-categories-container">
+            <button class="infolens-cat-btn active" data-category="all">
+                <i class="fas fa-border-all"></i> تمام موضوعات
+            </button>
+            <button class="infolens-cat-btn" data-category="geopolitics">
+                <i class="fas fa-globe"></i> جغرافیائی سیاست
+            </button>
+            <button class="infolens-cat-btn" data-category="economy">
+                <i class="fas fa-chart-line"></i> معیشت اور تجارت
+            </button>
+            <button class="infolens-cat-btn" data-category="defense">
+                <i class="fas fa-shield-alt"></i> دفاع اور سلامتی
+            </button>
+            <button class="infolens-cat-btn" data-category="climate">
+                <i class="fas fa-leaf"></i> ماحولیات اور توانائی
+            </button>
+            <button class="infolens-cat-btn" data-category="technology">
+                <i class="fas fa-microchip"></i> ٹیکنالوجی اور AI
+            </button>
+            <button class="infolens-cat-btn" data-category="human-rights">
+                <i class="fas fa-balance-scale"></i> انسانی حقوق
+            </button>
+        </div>
+    </nav>
+
+    <!-- 3. Pinterest-Style Masonry Grid -->
+    <main class="infolens-grid-wrapper">
+        <div id="infolens-grid" class="infolens-masonry-grid">
+            <!-- Dynamic Pinterest cards injected by infolens.js -->
+        </div>
+    </main>
+
+    <!-- 4. Pinterest-Style Interactive Modal (Pin View & Suggested Cycle) -->
+    <div id="infolens-modal" class="infolens-modal-backdrop" aria-hidden="true">
+        <div id="infolens-modal-box" class="infolens-modal-box">
+            <!-- Sleek, Small Top Close Button (top-left in RTL) -->
+            <button id="infolens-modal-close" class="infolens-modal-close-btn" title="بند کریں (ESC)" aria-label="انفوگرافک بند کریں">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Top Hero Card: Half Screen Visual + Core Header -->
+            <div class="infolens-modal-hero-card">
+                <!-- Half Screen Visual Stage -->
+                <div id="infolens-modal-media-pane" class="infolens-modal-media-pane">
+                    <div id="infolens-modal-svg" class="infolens-modal-svg-stage">
+                        <!-- High-resolution SVG injected here -->
+                    </div>
+                    <div class="infolens-touch-hint">
+                        <i class="fas fa-arrows-alt"></i> <span>زوم کرنے کے لیے دو انگلیوں سے چوٹکی بھریں (پنچ کریں)</span>
+                    </div>
+                </div>
+
+                <!-- Info Header & Expandable Read More Section -->
+                <div class="infolens-modal-info-pane">
+                    <div class="infolens-modal-badge-row">
+                        <span id="infolens-modal-category" class="infolens-modal-badge">جغرافیائی سیاست</span>
+                        <span id="infolens-modal-date" class="infolens-modal-date"></span>
+                    </div>
+                    <h2 id="infolens-modal-title" class="infolens-modal-title"></h2>
+
+                    <!-- Read More Toggle (Reveals full About & Data Takeaways) -->
+                    <button type="button" id="infolens-modal-readmore-btn" class="infolens-readmore-btn" aria-expanded="false" aria-controls="infolens-modal-expandable">
+                        <span id="infolens-readmore-text">اس گرافک کے بارے میں مزید پڑھیں</span>
+                        <i id="infolens-readmore-icon" class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <!-- Expandable Details Container -->
+                    <div id="infolens-modal-expandable" class="infolens-modal-expandable">
+                        <div class="infolens-modal-expandable-inner">
+                            <p id="infolens-modal-desc" class="infolens-modal-desc">
+                                انفوگرافک کی تفصیلات اور تفتیشی پس منظر یہاں ظاہر ہوگا۔
+                            </p>
+
+                            <!-- Key Takeaways Bullet Box -->
+                            <div id="infolens-modal-takeaways-box" class="infolens-modal-takeaways">
+                                <div class="infolens-takeaways-heading">
+                                    <i class="fas fa-bolt"></i> اہم ڈیٹا نکات
+                                </div>
+                                <ul id="infolens-modal-takeaways" class="infolens-takeaways-list">
+                                    <!-- Takeaways items -->
+                                </ul>
+                            </div>
+
+                            <!-- Editorial Article CTA & Share (No Like, No Save, No Download) -->
+                            <div class="infolens-modal-actions">
+                                <a id="infolens-modal-article-link" href="#" class="infolens-btn-primary">
+                                    <i class="fas fa-newspaper"></i> متعلقہ تفتیشی رپورٹ پڑھیں
+                                </a>
+                                <button type="button" id="infolens-modal-share-btn" class="infolens-btn-secondary">
+                                    <i class="fas fa-share-nodes"></i> انفوگرافک شیئر کریں
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom: Pinterest-Style Suggested Infographics Feed -->
+            <div class="infolens-modal-suggested-section">
+                <div class="infolens-suggested-header">
+                    <h3 class="infolens-suggested-title">
+                        <i class="fas fa-th-large"></i> اس جیسے مزید انفوگرافکس
+                    </h3>
+                    <p class="infolens-suggested-sub">مزید دریافت کے لیے نیچے کسی بھی گرافک پر کلک کریں</p>
+                </div>
+                <div id="infolens-modal-suggested-grid" class="infolens-suggested-grid">
+                    <!-- Dynamic suggested cards populated by infolens.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -33,6 +33,8 @@ include:
   - cms.html
   - liveCMS.html
   - latest.html
+  - infolens.html
+  - infolens.json
   - about.html
   - news-hub.html 
   - post.html

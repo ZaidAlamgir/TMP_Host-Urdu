@@ -53,3 +53,10 @@ SEO-optimization.md
 
 # --- Upgrade Plans ---
 upgrade-plans/
+
+# --- Article Staging & InfoLens ---
+_article_repos/
+_infolens/
+
+__pycache__/
+*.pyc

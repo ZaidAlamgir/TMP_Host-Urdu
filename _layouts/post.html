@@ -727,6 +727,88 @@ layout: default
         min-height: 250px !important;
     }
 
+    /* ========================================================
+       EDITORIAL SVG GRAPHIC & GEOPOLITICAL MAP EMBED STYLES
+       ======================================================== */
+    .tmp-editorial-svg-figure {
+        max-width: 100%;
+        margin: 2.25rem auto;
+        padding: 0;
+        background: #080d1a;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+        position: relative;
+        direction: rtl;
+    }
+    .tmp-svg-graphic-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #080d1a;
+        overflow: hidden;
+        direction: ltr; /* Keeps SVG internal coordinates natural */
+    }
+    .tmp-svg-graphic-wrapper svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    .article-body svg {
+        max-width: 100%;
+        height: auto;
+    }
+    .tmp-svg-caption {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1.25rem;
+        background: #0e1526;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, system-ui, sans-serif;
+        font-size: 0.88rem;
+        color: #94a3b8;
+        line-height: 1.5;
+        direction: rtl;
+    }
+    .tmp-svg-caption-title {
+        font-weight: 600;
+        color: #f1f5f9;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .tmp-svg-caption-source {
+        font-size: 0.78rem;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .tmp-svg-caption-source i {
+        color: #38bdf8;
+    }
+    
+    /* Interactive Map Hotspot & Callout Tooltip Enhancements */
+    .tmp-svg-graphic-wrapper .map-marker {
+        cursor: pointer;
+        outline: none;
+    }
+    .tmp-svg-graphic-wrapper .map-marker:focus-visible {
+        filter: drop-shadow(0 0 6px #38bdf8);
+    }
+    .tmp-svg-graphic-wrapper .callout-box {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        pointer-events: auto;
+    }
+
     /* --- META & LAYOUT (RTL) --- */
     .article-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; direction: rtl; }
     .author-name { font-weight: 600; font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', Tahoma, sans-serif; }
@@ -1275,6 +1357,91 @@ function setupArticleInteractions() {
     setupTableEnhancements();
     setupQuoteAndSpeechEnhancements();
     renderTelegramEmbeds();
+    initArticleSvgInteractivity();
+}
+
+function initArticleSvgInteractivity() {
+    const figures = document.querySelectorAll('.tmp-editorial-svg-figure, .article-body figure');
+    figures.forEach(figure => {
+        const svg = figure.querySelector('svg');
+        if (!svg) return;
+        if (svg.dataset.interactiveReady) return;
+        svg.dataset.interactiveReady = "true";
+
+        // Auto ensure responsive viewBox if width/height are set without viewBox
+        if (!svg.getAttribute('viewBox') && svg.getAttribute('width') && svg.getAttribute('height')) {
+            const w = parseFloat(svg.getAttribute('width'));
+            const h = parseFloat(svg.getAttribute('height'));
+            if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
+                svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+            }
+        }
+
+        // Map Hotspots & Interactive Callouts
+        const markers = svg.querySelectorAll('.map-marker, [data-hotspot], .hotspot-pin');
+        const callouts = svg.querySelectorAll('.callout-box, [data-callout-for]');
+
+        if (markers.length > 0) {
+            markers.forEach(marker => {
+                marker.style.cursor = 'pointer';
+                marker.setAttribute('tabindex', '0');
+                marker.setAttribute('role', 'button');
+
+                const handleMarkerClick = (e) => {
+                    e.stopPropagation();
+                    const pointId = marker.getAttribute('data-point-id') ||
+                                    marker.id.replace(/^marker-/, '').replace(/^pin-/, '');
+
+                    let matchingCallout = null;
+                    if (pointId) {
+                        matchingCallout = svg.querySelector(`#callout-${pointId}, [data-callout-for="${pointId}"], #detail-${pointId}`);
+                    }
+
+                    if (matchingCallout) {
+                        // Check if currently hidden
+                        const isHidden = matchingCallout.style.display === 'none' ||
+                                         matchingCallout.getAttribute('display') === 'none' ||
+                                         matchingCallout.getAttribute('opacity') === '0' ||
+                                         matchingCallout.classList.contains('hidden');
+
+                        if (isHidden) {
+                            // Close other collapsible callouts
+                            callouts.forEach(c => {
+                                if (c !== matchingCallout && c.dataset.collapsible === 'true') {
+                                    c.style.display = 'none';
+                                    c.setAttribute('display', 'none');
+                                }
+                            });
+                            matchingCallout.style.display = 'block';
+                            matchingCallout.setAttribute('display', 'block');
+                            matchingCallout.setAttribute('opacity', '1');
+                            matchingCallout.classList.remove('hidden');
+                        }
+
+                        // Bring matching callout to front so it doesn't get covered
+                        if (matchingCallout.parentElement) {
+                            matchingCallout.parentElement.appendChild(matchingCallout);
+                        }
+
+                        // Highlight animation on the callout
+                        matchingCallout.style.transition = 'filter 0.3s ease, transform 0.3s ease';
+                        matchingCallout.style.filter = 'drop-shadow(0 0 12px rgba(56, 189, 248, 0.6))';
+                        setTimeout(() => {
+                            matchingCallout.style.filter = '';
+                        }, 2200);
+                    }
+                };
+
+                marker.addEventListener('click', handleMarkerClick);
+                marker.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleMarkerClick(e);
+                    }
+                });
+            });
+        }
+    });
 }
 
 async function copyToClipboard(text, btnElement) {

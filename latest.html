@@ -39,11 +39,11 @@ permalink: /latest.html
 
 <script>
     (function() {
-        const latestUrl = "{{ latest.url | relative_url }}";
+        const targetUrl = "{{ '/infolens/' | relative_url }}";
         if (typeof Turbo !== 'undefined') {
-            Turbo.visit(latestUrl, { action: "replace" });
+            Turbo.visit(targetUrl, { action: "replace" });
         } else {
-            window.location.replace(latestUrl);
+            window.location.replace(targetUrl);
         }
     })();
 </script>

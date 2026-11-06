@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v40';
-const ARTICLE_CACHE = 'tmp-articles-v40';
-const ASSET_CACHE = 'tmp-assets-v40';
+const CORE_CACHE = 'tmp-core-v41';
+const ARTICLE_CACHE = 'tmp-articles-v41';
+const ASSET_CACHE = 'tmp-assets-v41';
 const CORE_ASSETS = [
     '/offline.html',  
     'https://author.tmpnews.com/profile/tmpnews.webp',     
@@ -13,9 +13,11 @@ const CORE_ASSETS = [
     '/assets/style/profile.css',
     '/assets/style/login.css',
     '/assets/style/live.css',    
+    '/assets/style/infolens.css',
     '/assets/header-injector.js',
     '/assets/bottom-nav.js',
     '/assets/js/live.js',   
+    '/assets/js/infolens.js',
     '/post.js',
     '/home.js',
     '/cache-manager.js',
@@ -56,7 +58,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); 
     event.waitUntil(
         caches.open(CORE_CACHE).then(async (cache) => {
-            console.log('SW: Caching Core App Shell v40');
+            console.log('SW: Caching Core App Shell v41');
             for (let asset of CORE_ASSETS) {
                 try {
                     const response = await fetch(asset, { cache: 'reload' });
@@ -119,11 +121,13 @@ self.addEventListener('fetch', (event) => {
         return; 
     }
 
-    // Live scripts & live styles Network-First strategy
+    // Live scripts, live styles & InfoLens assets: Network-First strategy
     if (
         url.pathname.includes('/assets/js/live.js') ||
         url.pathname.includes('/assets/bottom-nav.js') ||
-        url.pathname.includes('/assets/style/live.css')
+        url.pathname.includes('/assets/style/live.css') ||
+        url.pathname.includes('/assets/style/infolens.css') ||
+        url.pathname.includes('/assets/js/infolens.js')
     ) {
         const fetchOpts = hasForcedBypass ? { cache: 'reload' } : { cache: 'no-cache' };
         event.respondWith(
@@ -142,9 +146,10 @@ self.addEventListener('fetch', (event) => {
         
         const isHomePage = (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '');
         const isLivePage = (url.pathname === '/live' || url.pathname === '/live/' || url.pathname === '/live.html' || url.pathname.startsWith('/live/'));
+        const isInfolensPage = (url.pathname === '/infolens' || url.pathname === '/infolens/' || url.pathname === '/infolens.html' || url.pathname.startsWith('/infolens/'));
 
-        // Both Homepage and Live page use Network-First to guarantee real-time updates and respect force refresh
-        if (isHomePage || isLivePage) {
+        // Homepage, Live, and InfoLens use Network-First to guarantee real-time updates and respect force refresh
+        if (isHomePage || isLivePage || isInfolensPage) {
             const fetchOpts = hasForcedBypass ? { cache: 'reload' } : { cache: 'no-cache' };
             event.respondWith(
                 fetch(request, fetchOpts).then((networkResponse) => {

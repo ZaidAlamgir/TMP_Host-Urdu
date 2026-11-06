@@ -248,10 +248,13 @@ html.dark-mode .tmp-live-action-btn:hover {
 
 <script>
 (function() {
-    // Endpoints: checks local backend server first, falls back to production API
-    const BASE_URLS = [
+    // Endpoints: In local development, probe local backend; in production, use production API only
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const BASE_URLS = isLocal ? [
         'http://127.0.0.1:8000',
         'http://localhost:8000',
+        'https://api.tmpnews.com'
+    ] : [
         'https://api.tmpnews.com'
     ];
 

@@ -232,7 +232,7 @@ html.dark-mode .subheadline-container::after {
     <section class="top-story-section">
         <a href="{{ latest_post.url | relative_url }}" class="hero-spotlight-card">
             <div class="hero-image-pane">
-                <img src="{{ latest_post.image | default: 'https://placehold.co/1200x800/e2e8f0/64748b?text=Image+Not+Available' }}" alt="{{ latest_post.image_description | default: 'Top story image' | escape }}" class="hero-cover-img" loading="eager">
+                <img src="{{ latest_post.image | default: 'https://placehold.co/1200x800/e2e8f0/64748b?text=Image+Not+Available' }}" alt="{{ latest_post.image_description | default: 'Top story image' | escape }}" class="hero-cover-img" loading="eager" fetchpriority="high" decoding="async">
                 <div class="hero-live-badge-tag">
                     <span class="hero-pulse-dot"></span>
                     <span>تازہ ترین رپورٹ</span>
@@ -268,6 +268,66 @@ html.dark-mode .subheadline-container::after {
     {% endif %}
 
     <div class="content-wrapper">
+        <!-- Special Reports 10-Card Random Horizontal Slider (Last 5 Days) -->
+        <div class="home-slider-section-wrapper" id="home-slider-section-wrapper">
+            <div class="slider-section-header">
+                <div class="slider-title-wrapper">
+                    <span class="slider-live-dot"></span>
+                    <h3 class="slider-section-title">خصوصی رپورٹس</h3>
+                    <span class="slider-fresh-badge"><i class="fas fa-bolt"></i> روزانہ انتخاب</span>
+                </div>
+                <div class="slider-nav-controls">
+                    <button type="button" class="slider-arrow-btn slider-next-btn" id="sliderNextBtn" aria-label="اگلی رپورٹس">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button type="button" class="slider-arrow-btn slider-prev-btn" id="sliderPrevBtn" aria-label="پچھلی رپورٹس">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="slider-track-container" id="homeSliderTrackContainer">
+                <div class="slider-track" id="homeSliderTrack">
+                    {% for post in site.posts limit: 10 %}
+                    <a href="{{ post.url | relative_url }}" class="slide-story-card" title="{{ post.title | escape }}">
+                        <div class="slide-card-bg">
+                            <img src="{{ post.image | default: 'https://placehold.co/800x500/e2e8f0/64748b?text=News' }}" alt="{{ post.title | escape }}" class="slide-card-img" loading="lazy" decoding="async">
+                            <div class="slide-card-overlay"></div>
+                            <div class="slide-card-top-tag">
+                                <span class="slide-card-badge">{{ post.categories.first | default: 'تازہ ترین' | replace: '-', ' ' | capitalize }}</span>
+                            </div>
+                        </div>
+                        <div class="slide-card-content">
+                            <h4 class="slide-card-title">{{ post.title }}</h4>
+                            <div class="slide-card-footer">
+                                <span class="slide-card-date"><i class="far fa-calendar-alt"></i> {{ post.date | date: "%b %d, %Y" }}</span>
+                                {% assign s_words = post.content | number_of_words %}
+                                <span class="slide-card-read">{{ s_words | divided_by: 200 | plus: 1 }} منٹ</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Data Pool for Random 10 Stories Selection (Last 5 Days) -->
+        <script id="home-slider-pool-data" type="application/json">
+        [
+          {% for post in site.posts limit: 80 %}
+          {
+            "title": {{ post.title | jsonify }},
+            "url": {{ post.url | relative_url | jsonify }},
+            "date": {{ post.date | date: "%Y-%m-%d" | jsonify }},
+            "display_date": {{ post.date | date: "%b %d, %Y" | jsonify }},
+            "image": {{ post.image | default: 'https://placehold.co/800x500/e2e8f0/64748b?text=News' | jsonify }},
+            "category": {{ post.categories.first | default: 'تازہ ترین' | replace: '-', ' ' | capitalize | jsonify }},
+            "read_time": {% assign p_words = post.content | number_of_words %}{{ p_words | divided_by: 200 | plus: 1 }}
+          }{% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        ]
+        </script>
+
         <hr class="section-divider">
         
         <!-- Live Filterable Latest Reports Grid -->
@@ -342,6 +402,54 @@ html.dark-mode .subheadline-container::after {
             <div style="text-align: center; margin-top: 2rem;">
                 <a href="{{ '/news/hub/' | relative_url }}" class="explore-hub-btn">مکمل نیوز ہب دیکھیں <i class="fas fa-arrow-left mr-1.5"></i></a>
             </div>
+
+            <!-- Archive Spotlight 10-Card Random Horizontal Slider (Analysis & History Evergreen Collection) -->
+            <div class="home-slider-section-wrapper home-archive-slider-wrapper" id="home-archive-slider-section-wrapper">
+                <div class="slider-section-header">
+                    <div class="slider-title-wrapper">
+                        <span class="slider-live-dot archive-dot"></span>
+                        <h3 class="slider-section-title">تفصیلی تجزیہ اور تاریخ</h3>
+                        <span class="slider-fresh-badge archive-fresh-badge"><i class="fas fa-landmark"></i> دائمی آرکائیو</span>
+                    </div>
+                    <div class="slider-nav-controls">
+                        <button type="button" class="slider-arrow-btn slider-next-btn" id="archiveSliderNextBtn" aria-label="اگلی آرکائیو رپورٹس">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="slider-arrow-btn slider-prev-btn" id="archiveSliderPrevBtn" aria-label="پچھلی آرکائیو رپورٹس">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="slider-track-container" id="homeArchiveSliderTrackContainer">
+                    <div class="slider-track" id="homeArchiveSliderTrack">
+                        {% for post in site.posts limit: 10 %}
+                        <a href="{{ post.url | relative_url }}" class="slide-story-card" title="{{ post.title | escape }}">
+                            <div class="slide-card-bg">
+                                <img src="{{ post.image | default: 'https://placehold.co/800x500/e2e8f0/64748b?text=News' }}" alt="{{ post.title | escape }}" class="slide-card-img" loading="lazy" decoding="async">
+                                <div class="slide-card-overlay"></div>
+                                <div class="slide-card-top-tag">
+                                    <span class="slide-card-badge archive-badge">{{ post.categories.first | default: 'تجزیہ' | replace: '-', ' ' | capitalize }}</span>
+                                </div>
+                            </div>
+                            <div class="slide-card-content">
+                                <h4 class="slide-card-title">{{ post.title }}</h4>
+                                <div class="slide-card-footer">
+                                    <span class="slide-card-date"><i class="fas fa-landmark"></i> {{ post.date | date: "%b %d, %Y" }}</span>
+                                    {% assign a_words = post.content | number_of_words %}
+                                    <span class="slide-card-read">{{ a_words | divided_by: 200 | plus: 1 }} منٹ</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON Data Pool for Random 10 Evergreen Archive Stories (Analysis & History from D1) -->
+            <script id="home-archive-slider-pool-data" type="application/json">
+[{"title": "بھارت کے میزائل مین: یومِ پیدائش پر ڈاکٹر اے پی جے عبدالکلام کو خراجِ عقیدت", "url": "/news/history/missile-man-of-india-remembering-dr-a-p-j-abdul-kalam-on-his-birth-anniversary/", "date": "2026-10-15", "display_date": "2026-10-15", "image": "https://assets1.tmpnews.com/images/apj-abdul-kalam.webp", "category": "تاریخ", "read_time": 5, "is_local": true}, {"title": "عال ادارہ صحت (یو ایچ او) کی بچوں میں موٹاپے میں عالمی اضافے کی تنبیہ، 1990ء سے کیسز چار گنا بڑھ گئے", "url": "/news/analysis-in-depth-reports/who-warns-of-global-surge-in-childhood-obesity-as-cases-quadruple-since-1990/", "date": "2026-10-08", "display_date": "2026-10-08", "image": "https://assets1.tmpnews.com/images/obesity.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "شادیان 1975 کا قتل عام: مساجد کا دفاع کرنے والے 1,600 ہوئی مسلمانوں کو پی ایل اے کے محاصرے نے کیسے شہید کیا", "url": "/news/history/shadian-1975-massacre-how-the-pla-siege-killed-1-600-hui-muslims-defending-mosques/", "date": "2026-10-31", "display_date": "2026-10-31", "image": "https://assets.tmpnews.com/images/shadian-massacre.webp", "category": "تاریخ", "read_time": 5, "is_local": true}, {"title": "بھارت میں اقلیتوں کے خلاف نفرت انگیز جرائم میں اضافے کے دوران آدتیہ ناتھ کا شمولیت کا دعویٰ", "url": "/news/analysis-in-depth-reports/adityanath-touts-inclusivity-as-minority-hate-crimes-surge-in-india/", "date": "2026-10-21", "display_date": "2026-10-21", "image": "https://assets.tmpnews.com/images/ajay-bisht.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "صلاح الدین ایوبی نے 2 اکتوبر 1187 کو یروشلم فتح کیا", "url": "/news/history/salahuddin-ayyubi-conquers-jerusalem-on-october-2-1187/", "date": "2026-10-02", "display_date": "2026-10-02", "image": "https://assets1.tmpnews.com/images/conquest-of-jerusalem.webp", "category": "تاریخ", "read_time": 5, "is_local": true}, {"title": "گرانٹم مطالعہ: 2026 کی گرم لہروں سے یورپ میں 50,000 سے زائد اموات جڑ گئیں", "url": "/news/analysis-in-depth-reports/grantham-study-links-over-50-000-european-deaths-to-2026-heatwaves/", "date": "2026-10-23", "display_date": "2026-10-23", "image": "https://assets.tmpnews.com/images/europe-summer-heat-map.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "اسرائیلی محقق کا بھارت کے آر ایس ایس کے ساتھ", "url": "/news/analysis-in-depth-reports/israeli-researcher-cites-ideological-alliance-with-india-s-rss/", "date": "2026-10-19", "display_date": "2026-10-19", "image": "https://assets.tmpnews.com/images/israeli-researcher-cites-ideological-alliance-with-indias-rss.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "گاندھی جینتی: سچائی اور عدم تشدد کو خراج عقیدت پیش کرنے کا دن", "url": "/news/history/gandhi-jayanti-a-day-to-honour-truth-and-non-violence/", "date": "2026-10-02", "display_date": "2026-10-02", "image": "https://assets1.tmpnews.com/images/mahatma-gandhi.webp", "category": "تاریخ", "read_time": 5, "is_local": true}, {"title": "بھارت کی علاقائی رسوخ میں کمی: نظریاتی پالیسی نے جنوبی ایشیا کے تعلقات کو کشیدہ کر دیا", "url": "/news/analysis-in-depth-reports/india-loses-regional-influence-as-ideology-strains-south-asian-ties/", "date": "2026-10-24", "display_date": "2026-10-24", "image": "https://assets.tmpnews.com/images/narendra-modi.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "شمالی افریقہ اور مشرقِ وسطیٰ میں گہرے ہوتے بحرانوں کے درمیان زرعی شعبے میں فوری سرمایہ کاری کی ضرورت: ایف اے او کی تنبیہ", "url": "/news/analysis-in-depth-reports/north-africa-and-the-middle-east-need-urgent-farm-investment-amid-deepening-crises-fao-warns/", "date": "2026-10-08", "display_date": "2026-10-08", "image": "https://assets1.tmpnews.com/images/tmp-collage.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "بھارت کا سڑک نیٹ ورک: بنیادی ڈھانچے کا دیو ہیکل نظام جو سڑک حادثات اور حفاظتی بحران کی زد میں ہے", "url": "/news/analysis-in-depth-reports/india-s-road-network-a-giant-of-infrastructure-plagued-by-a-crisis-of-safety/", "date": "2026-10-13", "display_date": "2026-10-13", "image": "https://assets1.tmpnews.com/images/road-accident-shows-in-pin-board-style-by-tmpnews.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "اتر  کی انتخابی فہرست میں شامل کیے جانے والے پراسرار 16.18 لاکھ ووٹرز", "url": "/news/analysis-depth-report/the-mysterious-16-18-lakh-voters-added-to-uttar-pradesh-s-electoral-roll/", "date": "2026-10-07", "display_date": "2026-10-07", "image": "https://assets1.tmpnews.com/images/uttarpradesh-mysterious-voters-added.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "بھارت میں ووٹر فہرستوں سے ناموں کے اخراج پر ہنگامہ، وجوہات ظاہر نہ کرنے پر شدید تشویش", "url": "/news/analysis-in-depth-reports/india-voter-roll-deletions-spark-outrage-over-lack-of-reasons/", "date": "2026-10-09", "display_date": "2026-10-09", "image": "https://assets1.tmpnews.com/images/sir-irregularities-in-up-sparks-tension-nation-wide.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "زمین کے اندر رینے والے کرومیم کی صفائی: نِشک اور بالٹیمور کی مثالوں سے سبق", "url": "/news/analysis/cleaning-up-chromium-that-has-seeped-underground-lessons-from-nashik-and-baltimore/", "date": "2026-10-16", "display_date": "2026-10-16", "image": "https://assets1.tmpnews.com/images/chromium.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}, {"title": "امریکا نے ایران کے ساتھ سات ماہ کی جنگ میں 19 سال کا پیٹریاٹ میزائل ذخیرہ ختم کر دیا", "url": "/news/analysis-in-depth-reports/u-s-expends-19-years-of-patriot-missiles-in-seven-months-of-iran-war/", "date": "2026-10-19", "display_date": "2026-10-19", "image": "https://assets.tmpnews.com/images/patriot.webp", "category": "تجزیہ", "read_time": 5, "is_local": true}]
+            </script>
         </section>
 
         <hr class="section-divider">
@@ -428,9 +536,282 @@ html.dark-mode .subheadline-container::after {
                     });
                 }
             }
+
+        // Initialize Special Reports 10-Post Random Slider (Fresh Selection < 5 Days)
+        initSpotlightSlider();
+
+        // Initialize In-Depth Analysis & History 10-Post Random Slider (D1 Archive Evergreen)
+        initArchiveSlider();
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function shuffleArray(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // Shared smooth swipe & desktop pointer pan interaction handler (RTL Aware)
+    function setupTrackInteractions(track, prevBtnId, nextBtnId) {
+        if (!track || track._interactionsSetup) return;
+        track._interactionsSetup = true;
+
+        const prevBtn = document.getElementById(prevBtnId);
+        const nextBtn = document.getElementById(nextBtnId);
+        const isRTL = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+
+        function updateNavState() {
+            if (!prevBtn || !nextBtn) return;
+            const maxScroll = track.scrollWidth - track.clientWidth - 5;
+            const curScroll = Math.abs(track.scrollLeft);
+            prevBtn.disabled = curScroll <= 5;
+            nextBtn.disabled = curScroll >= maxScroll;
+            prevBtn.style.opacity = prevBtn.disabled ? '0.35' : '1';
+            nextBtn.style.opacity = nextBtn.disabled ? '0.35' : '1';
+            prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
+            nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
         }
 
-        document.addEventListener('turbo:load', initHomePage);
+        if (prevBtn && nextBtn) {
+            nextBtn.onclick = () => {
+                const card = track.querySelector('.slide-story-card');
+                const step = card ? (card.offsetWidth + 14) * 2 : track.clientWidth * 0.85;
+                track.scrollBy({ left: isRTL ? -step : step, behavior: 'smooth' });
+            };
+            prevBtn.onclick = () => {
+                const card = track.querySelector('.slide-story-card');
+                const step = card ? (card.offsetWidth + 14) * 2 : track.clientWidth * 0.85;
+                track.scrollBy({ left: isRTL ? step : -step, behavior: 'smooth' });
+            };
+            track.addEventListener('scroll', updateNavState, { passive: true });
+            updateNavState();
+        }
+
+        // Desktop Mouse Drag Panning (Listeners attached only during active drag to eliminate idle overhead)
+        let isDown = false;
+        let startX = 0;
+        let scrollStart = 0;
+        let hasMoved = false;
+
+        function onPointerMove(e) {
+            if (!isDown) return;
+            const x = e.pageX - track.offsetLeft;
+            const walk = (x - startX) * 1.25;
+            if (Math.abs(walk) > 5) {
+                hasMoved = true;
+            }
+            track.scrollLeft = scrollStart - (isRTL ? -walk : walk);
+        }
+
+        function onPointerUp(e) {
+            if (isDown) {
+                isDown = false;
+                track.classList.remove('is-dragging');
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', onPointerUp);
+            }
+        }
+
+        track.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            isDown = true;
+            hasMoved = false;
+            startX = e.pageX - track.offsetLeft;
+            scrollStart = track.scrollLeft;
+            track.classList.add('is-dragging');
+            window.addEventListener('pointermove', onPointerMove, { passive: true });
+            window.addEventListener('pointerup', onPointerUp, { passive: true });
+        });
+
+        // Touch Drag Threshold Tracking (Prevents accidental clicks when swiping on mobile)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        track.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                hasMoved = false;
+            }
+        }, { passive: true });
+
+        track.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                const diffX = Math.abs(e.touches[0].clientX - touchStartX);
+                const diffY = Math.abs(e.touches[0].clientY - touchStartY);
+                if (diffX > 8 || diffY > 8) {
+                    hasMoved = true;
+                }
+            }
+        }, { passive: true });
+
+        track.addEventListener('click', (e) => {
+            if (hasMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                hasMoved = false;
+            }
+        }, true);
+    }
+
+    // 1. Slider 1: Special Reports (Last 5 Days Selection)
+    function initSpotlightSlider() {
+        const track = document.getElementById('homeSliderTrack');
+        const poolEl = document.getElementById('home-slider-pool-data');
+        if (!track || !poolEl) return;
+
+        setupTrackInteractions(track, 'sliderPrevBtn', 'sliderNextBtn');
+
+        let posts = [];
+        try {
+            posts = JSON.parse(poolEl.textContent || '[]');
+        } catch (e) {
+            console.error("Failed to parse slider posts pool:", e);
+            return;
+        }
+
+        if (!Array.isArray(posts) || posts.length === 0) return;
+
+        let maxPostTime = 0;
+        posts.forEach(p => {
+            if (!p.date) return;
+            const t = new Date(p.date + 'T23:59:59Z').getTime();
+            if (!isNaN(t) && t > maxPostTime) {
+                maxPostTime = t;
+            }
+        });
+
+        const refTime = Math.max(Date.now(), maxPostTime);
+        const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
+        const cutoffTime = refTime - fiveDaysMs;
+
+        let eligible = posts.filter(p => {
+            if (!p.date) return false;
+            const t = new Date(p.date + 'T23:59:59Z').getTime();
+            return !isNaN(t) && t >= cutoffTime;
+        });
+
+        if (eligible.length < 10) {
+            eligible = posts.slice(0, Math.max(15, eligible.length));
+        }
+
+        const selectedPosts = shuffleArray(eligible).slice(0, 10);
+
+        // Avoid flickering: only update innerHTML if URLs changed
+        const existingUrls = Array.from(track.querySelectorAll('.slide-story-card')).map(a => a.getAttribute('href'));
+        const newUrls = selectedPosts.map(p => p.url);
+        const isIdentical = existingUrls.length === newUrls.length && existingUrls.every((u, i) => u === newUrls[i]);
+
+        if (!isIdentical) {
+            track.innerHTML = selectedPosts.map(post => `
+                <a href="${post.url}" class="slide-story-card" title="${escapeHtml(post.title)}">
+                    <div class="slide-card-bg">
+                        <img src="${post.image}" alt="${escapeHtml(post.title)}" class="slide-card-img" loading="lazy" decoding="async">
+                        <div class="slide-card-overlay"></div>
+                        <div class="slide-card-top-tag">
+                            <span class="slide-card-badge">${escapeHtml(post.category)}</span>
+                        </div>
+                    </div>
+                    <div class="slide-card-content">
+                        <h4 class="slide-card-title">${escapeHtml(post.title)}</h4>
+                        <div class="slide-card-footer">
+                            <span class="slide-card-date"><i class="far fa-calendar-alt"></i> ${escapeHtml(post.display_date)}</span>
+                            <span class="slide-card-read">${post.read_time} منٹ</span>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+    }
+
+    // 2. Slider 2: In-Depth Analysis & History (Evergreen D1 Archive Collection)
+    function initArchiveSlider() {
+        const track = document.getElementById('homeArchiveSliderTrack');
+        const poolEl = document.getElementById('home-archive-slider-pool-data');
+        if (!track) return;
+
+        setupTrackInteractions(track, 'archiveSliderPrevBtn', 'archiveSliderNextBtn');
+
+        let pool = [];
+        if (poolEl) {
+            try {
+                pool = JSON.parse(poolEl.textContent || '[]');
+            } catch (e) {
+                console.error("Failed to parse archive pool data:", e);
+            }
+        }
+
+        const isLocal = typeof window !== 'undefined' && window.location && (
+            window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' || 
+            /^\d+\.\d+\.\d+\.\d+$/.test(window.location.hostname)
+        );
+
+        function renderCards(posts) {
+            if (!Array.isArray(posts) || posts.length === 0) return;
+            const existingUrls = Array.from(track.querySelectorAll('.slide-story-card')).map(a => a.getAttribute('href'));
+            const newUrls = posts.map(post => (isLocal && post.is_local === false) ? ('https://theurdupost.tmpnews.com' + post.url) : post.url);
+            const isIdentical = existingUrls.length === newUrls.length && existingUrls.every((u, i) => u === newUrls[i]);
+            if (isIdentical) return;
+
+            track.innerHTML = posts.map(post => {
+                let href = post.url;
+                if (isLocal && post.is_local === false) {
+                    href = 'https://theurdupost.tmpnews.com' + post.url;
+                }
+                return `
+                <a href="${href}" class="slide-story-card" title="${escapeHtml(post.title)}">
+                    <div class="slide-card-bg">
+                        <img src="${post.image}" alt="${escapeHtml(post.title)}" class="slide-card-img" loading="lazy" decoding="async">
+                        <div class="slide-card-overlay"></div>
+                        <div class="slide-card-top-tag">
+                            <span class="slide-card-badge archive-badge">${escapeHtml(post.category)}</span>
+                        </div>
+                    </div>
+                    <div class="slide-card-content">
+                        <h4 class="slide-card-title">${escapeHtml(post.title)}</h4>
+                        <div class="slide-card-footer">
+                            <span class="slide-card-date"><i class="fas fa-landmark"></i> ${escapeHtml(post.display_date || post.date)}</span>
+                            <span class="slide-card-read">${post.read_time || 5} منٹ</span>
+                        </div>
+                    </div>
+                </a>
+            `}).join('');
+        }
+
+        // Immediate render: On local dev, prioritize articles that exist locally in _site
+        if (Array.isArray(pool) && pool.length > 0) {
+            const localPool = isLocal ? pool.filter(p => p.is_local) : pool;
+            const poolToUse = (localPool.length >= 10) ? localPool : pool;
+            const selected = shuffleArray(poolToUse).slice(0, 10);
+            renderCards(selected);
+        }
+
+        // Edge dynamic sync: On live Cloudflare Pages, fetch fresh random picks from D1
+        if (!isLocal && typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+            fetch('/api/archive-spotlight')
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && Array.isArray(data.posts) && data.posts.length > 0) {
+                        renderCards(data.posts);
+                    }
+                })
+                .catch(() => {});
+        }
+    }
+
+    document.addEventListener('turbo:load', initHomePage);
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initHomePage);

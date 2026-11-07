@@ -2,6 +2,10 @@
    TMP INFOLENS - PINTEREST-STYLE INFOGRAPHICS & DATA UI
    ======================================================== */
 
+html {
+    scrollbar-gutter: stable;
+}
+
 .infolens-page {
     width: 100%;
     min-height: 85vh;
@@ -266,6 +270,10 @@ html.dark-mode .infolens-cat-btn.active {
     position: relative;
     display: flex;
     flex-direction: column;
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .infolens-card:hover {
@@ -516,6 +524,8 @@ html.dark-mode .infolens-empty-icon {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.28s ease, visibility 0.28s ease;
+    will-change: opacity, visibility;
+    transform: translateZ(0);
 }
 
 .infolens-modal-backdrop.is-open {
@@ -535,13 +545,13 @@ html.dark-mode .infolens-empty-icon {
     position: relative;
     display: flex;
     flex-direction: column;
-    transform: scale(0.96);
+    transform: scale(0.96) translateZ(0);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    scroll-behavior: smooth;
+    will-change: transform;
 }
 
 .infolens-modal-backdrop.is-open .infolens-modal-box {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
 }
 
 html.dark-mode .infolens-modal-box {
@@ -605,7 +615,7 @@ html.dark-mode .infolens-modal-hero-card {
     border-bottom-color: #334155;
 }
 
-/* Visual Stage with Pinch-to-Zoom */
+/* Visual Stage with Pinch-to-Zoom & Pan */
 .infolens-modal-media-pane {
     width: 100%;
     background: #0b1120;
@@ -618,8 +628,9 @@ html.dark-mode .infolens-modal-hero-card {
     min-height: 240px;
     max-height: 52vh;
     overflow: hidden;
-    touch-action: pan-y pinch-zoom;
+    touch-action: none;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .infolens-modal-svg-stage {
@@ -627,8 +638,10 @@ html.dark-mode .infolens-modal-hero-card {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.12s ease-out;
     transform-origin: center center;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .infolens-modal-svg-stage svg {
@@ -1011,6 +1024,9 @@ html.dark-mode .infolens-suggested-title i {
     .infolens-modal-backdrop {
         padding: 0 !important;
         align-items: flex-end;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(15, 23, 42, 0.96) !important;
     }
 
     .infolens-modal-box {

@@ -341,8 +341,14 @@ jobs:
 
       - name: 41b. Consolidate InfoLens SVG Infographics (< 60 Days)
         run: |
-          echo "--- Consolidating Urdu InfoLens SVG Infographics ---"
-          python3 ./main_site/scripts/consolidate_infolens.py --src ./_article_repos/infolens/posts --dest-json ./main_site/infolens.json --dest-site-json ./main_site/_site/infolens.json --days 60
+          echo "--- Consolidating Urdu InfoLens SVG Infographics (Standalone + Article Embedded SVGs) ---"
+          python3 ./main_site/scripts/consolidate_infolens.py \
+            --src ./_article_repos/infolens/posts \
+            --posts-src ./main_site/_posts \
+            --dest-json ./main_site/infolens.json \
+            --dest-site-json ./main_site/_site/infolens.json \
+            --dest-collection ./main_site/_infolens \
+            --days 60
       
       - name: 42. Setup Ruby
         uses: ruby/setup-ruby@v1

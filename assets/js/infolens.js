@@ -380,17 +380,37 @@
     let searchQuery = '';
     let currentActivePin = null;
 
-    // --- PINCH-TO-ZOOM GESTURE ENGINE (Native Two-Finger Touch & Double-Tap) ---
-    let pinchScale = 1.0;
-    let pinchStartDist = 0;
-    let isPinching = false;
-    let lastTapTimestamp = 0;
+    // Body scroll locking with scrollbar width compensation (prevents desktop shift)
+    function lockBodyScroll() {
+        const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (scrollBarWidth > 0) {
+            document.body.style.paddingRight = `${scrollBarWidth}px`;
+        }
+        document.body.style.overflow = 'hidden';
+    }
+
+    function unlockBodyScroll() {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+
+    // --- ADVANCED PINCH-TO-ZOOM & PAN/DRAG ENGINE ---
+    let zoomScale = 1.0;
+    let panX = 0;
+    let panY = 0;
 
     function resetPinchZoom() {
-        pinchScale = 1.0;
+        zoomScale = 1.0;
+        panX = 0;
+        panY = 0;
         const stage = document.getElementById('infolens-modal-svg');
+        const mediaPane = document.getElementById('infolens-modal-media-pane');
         if (stage) {
-            stage.style.transform = 'scale(1)';
+            stage.style.transition = 'none';
+            stage.style.transform = 'translate3d(0px, 0px, 0px) scale(1)';
+        }
+        if (mediaPane) {
+            mediaPane.style.cursor = 'default';
         }
     }
 
@@ -400,24 +420,121 @@
         if (!mediaPane || !stage || mediaPane._pinchZoomAttached) return;
         mediaPane._pinchZoomAttached = true;
 
-        function getTouchDistance(touches) {
-            return Math.hypot(
-                touches[0].clientX - touches[1].clientX,
-                touches[0].clientY - touches[1].clientY
-            );
+        // Gesture state
+        let isPinching = false;
+        let isDragging = false;
+        let startDist = 0;
+        let startScale = 1.0;
+        let startMidX = 0;
+        let startMidY = 0;
+        let startPanX = 0;
+        let startPanY = 0;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        let lastTapTimestamp = 0;
+
+        // Desktop mouse drag state
+        let isMouseDown = false;
+        let mouseStartX = 0;
+        let mouseStartY = 0;
+        let mouseStartPanX = 0;
+        let mouseStartPanY = 0;
+
+        function clamp(val, min, max) {
+            return Math.max(min, Math.min(max, val));
         }
 
+        function getDistance(t1, t2) {
+            return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+        }
+
+        function getMidpoint(t1, t2) {
+            return {
+                x: (t1.clientX + t2.clientX) / 2,
+                y: (t1.clientY + t2.clientY) / 2
+            };
+        }
+
+        function getPanBounds() {
+            const paneRect = mediaPane.getBoundingClientRect();
+            const svg = stage.querySelector('svg');
+            const baseW = svg ? (svg.clientWidth || paneRect.width) : paneRect.width;
+            const baseH = svg ? (svg.clientHeight || paneRect.height) : paneRect.height;
+            
+            const scaledW = baseW * zoomScale;
+            const scaledH = baseH * zoomScale;
+
+            // Allow panning so user can examine any corner or edge with comfortable margin
+            const maxX = Math.max(0, (scaledW - paneRect.width) / 2 + 80);
+            const maxY = Math.max(0, (scaledH - paneRect.height) / 2 + 80);
+            return { maxX, maxY };
+        }
+
+        function applyTransform(withAnimation = false) {
+            const { maxX, maxY } = getPanBounds();
+            if (zoomScale <= 1.05) {
+                panX = 0;
+                panY = 0;
+                mediaPane.style.cursor = 'default';
+            } else {
+                panX = clamp(panX, -maxX, maxX);
+                panY = clamp(panY, -maxY, maxY);
+                mediaPane.style.cursor = isDragging || isMouseDown ? 'grabbing' : 'grab';
+            }
+
+            if (withAnimation) {
+                stage.style.transition = 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1)';
+            } else {
+                stage.style.transition = 'none';
+            }
+
+            stage.style.transform = `translate3d(${panX}px, ${panY}px, 0px) scale(${zoomScale})`;
+        }
+
+        // --- Touch Gestures ---
         mediaPane.addEventListener('touchstart', (e) => {
+            stage.style.transition = 'none';
             if (e.touches.length === 2) {
                 isPinching = true;
-                pinchStartDist = getTouchDistance(e.touches);
+                isDragging = false;
+                startDist = getDistance(e.touches[0], e.touches[1]);
+                startScale = zoomScale;
+                const mid = getMidpoint(e.touches[0], e.touches[1]);
+                startMidX = mid.x;
+                startMidY = mid.y;
+                startPanX = panX;
+                startPanY = panY;
             } else if (e.touches.length === 1) {
-                // Double-tap toggle zoom between 1.0 and 2.0x
+                isPinching = false;
+                const touch = e.touches[0];
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+
+                if (zoomScale > 1.05) {
+                    isDragging = true;
+                    startPanX = panX;
+                    startPanY = panY;
+                } else {
+                    isDragging = false;
+                }
+
+                // Double-tap zoom toggle (1.0x <-> 2.2x)
                 const now = Date.now();
                 if (now - lastTapTimestamp < 320) {
                     e.preventDefault();
-                    pinchScale = (pinchScale > 1.2) ? 1.0 : 2.0;
-                    stage.style.transform = `scale(${pinchScale})`;
+                    if (zoomScale > 1.2) {
+                        zoomScale = 1.0;
+                        panX = 0;
+                        panY = 0;
+                    } else {
+                        zoomScale = 2.2;
+                        const paneRect = mediaPane.getBoundingClientRect();
+                        const offsetX = touch.clientX - (paneRect.left + paneRect.width / 2);
+                        const offsetY = touch.clientY - (paneRect.top + paneRect.height / 2);
+                        panX = -offsetX * 0.8;
+                        panY = -offsetY * 0.8;
+                    }
+                    applyTransform(true);
                 }
                 lastTapTimestamp = now;
             }
@@ -425,34 +542,118 @@
 
         mediaPane.addEventListener('touchmove', (e) => {
             if (isPinching && e.touches.length === 2) {
+                // Two-finger pinch AND pan simultaneously
                 e.preventDefault();
-                const dist = getTouchDistance(e.touches);
-                if (pinchStartDist > 0) {
-                    const factor = dist / pinchStartDist;
-                    pinchScale = Math.min(Math.max(pinchScale * factor, 1.0), 3.5);
-                    pinchStartDist = dist;
-                    stage.style.transform = `scale(${pinchScale})`;
+                const dist = getDistance(e.touches[0], e.touches[1]);
+                const mid = getMidpoint(e.touches[0], e.touches[1]);
+
+                if (startDist > 0) {
+                    const factor = dist / startDist;
+                    zoomScale = clamp(startScale * factor, 1.0, 4.0);
+                    // Translate image with the midpoint movement of the two fingers
+                    panX = startPanX + (mid.x - startMidX);
+                    panY = startPanY + (mid.y - startMidY);
+                    applyTransform(false);
                 }
+            } else if (isDragging && e.touches.length === 1 && zoomScale > 1.05) {
+                // One-finger slide/pan when zoomed in
+                e.preventDefault();
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - lastTouchX;
+                const deltaY = touch.clientY - lastTouchY;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+
+                panX += deltaX;
+                panY += deltaY;
+                applyTransform(false);
             }
         }, { passive: false });
 
         mediaPane.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) {
+            if (e.touches.length === 0) {
                 isPinching = false;
-                if (pinchScale < 1.08) {
-                    pinchScale = 1.0;
-                    stage.style.transform = 'scale(1)';
+                isDragging = false;
+                if (zoomScale < 1.08) {
+                    zoomScale = 1.0;
+                    panX = 0;
+                    panY = 0;
+                }
+                applyTransform(true);
+            } else if (e.touches.length === 1) {
+                isPinching = false;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+                if (zoomScale > 1.05) {
+                    isDragging = true;
                 }
             }
         });
 
-        // Desktop mouse wheel zoom with Ctrl or Meta key
-        mediaPane.addEventListener('wheel', (e) => {
-            if (e.ctrlKey || e.metaKey) {
+        // --- Desktop Mouse Drag / Pan ---
+        mediaPane.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            if (zoomScale > 1.05) {
+                isMouseDown = true;
+                mouseStartX = e.clientX;
+                mouseStartY = e.clientY;
+                mouseStartPanX = panX;
+                mouseStartPanY = panY;
+                mediaPane.style.cursor = 'grabbing';
                 e.preventDefault();
-                const delta = e.deltaY < 0 ? 0.15 : -0.15;
-                pinchScale = Math.min(Math.max(pinchScale + delta, 1.0), 3.5);
-                stage.style.transform = `scale(${pinchScale})`;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isMouseDown && zoomScale > 1.05) {
+                const deltaX = e.clientX - mouseStartX;
+                const deltaY = e.clientY - mouseStartY;
+                panX = mouseStartPanX + deltaX;
+                panY = mouseStartPanY + deltaY;
+                applyTransform(false);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isMouseDown) {
+                isMouseDown = false;
+                if (zoomScale > 1.05) {
+                    mediaPane.style.cursor = 'grab';
+                }
+                applyTransform(true);
+            }
+        });
+
+        // Double click to toggle zoom on desktop
+        mediaPane.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            if (zoomScale > 1.2) {
+                zoomScale = 1.0;
+                panX = 0;
+                panY = 0;
+            } else {
+                zoomScale = 2.2;
+                const paneRect = mediaPane.getBoundingClientRect();
+                const offsetX = e.clientX - (paneRect.left + paneRect.width / 2);
+                const offsetY = e.clientY - (paneRect.top + paneRect.height / 2);
+                panX = -offsetX * 0.8;
+                panY = -offsetY * 0.8;
+            }
+            applyTransform(true);
+        });
+
+        // Desktop mouse wheel zoom
+        mediaPane.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.2 : -0.2;
+            const newScale = clamp(zoomScale + delta, 1.0, 4.0);
+            if (newScale !== zoomScale) {
+                zoomScale = newScale;
+                if (zoomScale <= 1.05) {
+                    panX = 0;
+                    panY = 0;
+                }
+                applyTransform(true);
             }
         }, { passive: false });
     }
@@ -522,7 +723,7 @@
             return;
         }
 
-        // Sort items: same category first, then others
+        // Sort items: same category first, then others (limit to top 6 for instant modal performance)
         const activeItem = INFOLENS_DATA.find(x => x.id === activeId);
         const sortedItems = [...otherItems].sort((a, b) => {
             if (activeItem && a.category === activeItem.category && b.category !== activeItem.category) return -1;
@@ -530,7 +731,9 @@
             return 0;
         });
 
-        suggestedGrid.innerHTML = sortedItems.map(item => `
+        const topSuggestions = sortedItems.slice(0, 6);
+
+        suggestedGrid.innerHTML = topSuggestions.map(item => `
             <div class="infolens-card infolens-suggested-card" data-id="${item.id}">
                 <div class="infolens-card-media">
                     <span class="infolens-card-pill-svg">SVG</span>
@@ -559,7 +762,7 @@
     }
 
     // --- PINTEREST-STYLE LIGHTBOX MODAL ---
-    function openModal(id) {
+    function openModal(id, fromHistory = false) {
         const item = INFOLENS_DATA.find(x => x.id === id);
         if (!item) return;
 
@@ -619,38 +822,46 @@
         // 5. Reset pinch zoom transform
         resetPinchZoom();
 
-        // 6. Populate Suggested Infographics below (Pinterest Cycle)
-        renderSuggestedGrid(item.id);
+        // 6. Instant scroll reset to top
+        if (modalBox) {
+            modalBox.scrollTop = 0;
+        }
 
         // 7. Show modal
         modalBackdrop.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
+        lockBodyScroll();
 
-        // 8. Smoothly scroll modal box back to top
-        if (modalBox) {
-            modalBox.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        // 8. Populate Suggested Infographics below - deferred with requestAnimationFrame for 60fps modal entry
+        requestAnimationFrame(() => {
+            renderSuggestedGrid(item.id);
+        });
 
         // 9. Attach pinch gestures if not already attached
         setupPinchZoom();
 
-        // 10. Update URL hash without page reload
-        try {
-            history.replaceState(null, null, `#${item.id}`);
-        } catch(e) {}
+        // 10. Update URL hash and history state for back button navigation
+        if (!fromHistory) {
+            try {
+                history.pushState({ infolensModalOpen: true, id: item.id }, '', `#${item.id}`);
+            } catch(e) {}
+        }
     }
 
-    function closeModal() {
+    function closeModal(fromPopState = false) {
         const modalBackdrop = document.getElementById('infolens-modal');
         if (!modalBackdrop) return;
         modalBackdrop.classList.remove('is-open');
-        document.body.style.overflow = '';
+        unlockBodyScroll();
         currentActivePin = null;
         resetPinchZoom();
 
-        try {
-            history.replaceState(null, null, window.location.pathname);
-        } catch(e) {}
+        if (!fromPopState) {
+            if (window.location.hash) {
+                try {
+                    history.replaceState(null, null, window.location.pathname);
+                } catch(e) {}
+            }
+        }
     }
 
     function shareCurrentPin(id) {
@@ -721,10 +932,14 @@
             })
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
-                    INFOLENS_DATA = data;
-                    renderGrid();
-                    if (currentActivePin) {
-                        renderSuggestedGrid(currentActivePin.id);
+                    const existingIds = INFOLENS_DATA.map(x => x.id).join(',');
+                    const newIds = data.map(x => x.id).join(',');
+                    if (existingIds !== newIds) {
+                        INFOLENS_DATA = data;
+                        renderGrid();
+                        if (currentActivePin) {
+                            renderSuggestedGrid(currentActivePin.id);
+                        }
                     }
                 } else {
                     fetchEdgeFeed(1);
@@ -776,16 +991,20 @@
             });
         }
 
-        // 3. Setup Live Search Input
+        // 3. Setup Live Search Input with Debounce (avoids micro-stutters during typing)
         const searchInput = document.getElementById('infolens-search');
         const clearBtn = document.getElementById('infolens-search-clear');
+        let searchTimer = null;
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 searchQuery = e.target.value.trim();
                 if (clearBtn) {
                     clearBtn.style.display = searchQuery.length > 0 ? 'flex' : 'none';
                 }
-                renderGrid();
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    renderGrid();
+                }, 120);
             });
         }
         if (clearBtn && searchInput) {
@@ -890,10 +1109,20 @@
             setupPinchZoom();
         }
 
-        // 6. Keyboard navigation (ESC to close modal)
+        // 6. Keyboard navigation (ESC to close modal) & Browser/Android Back Button
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && document.getElementById('infolens-modal')?.classList.contains('is-open')) {
                 closeModal();
+            }
+        });
+
+        window.addEventListener('popstate', (e) => {
+            const modal = document.getElementById('infolens-modal');
+            if (modal && modal.classList.contains('is-open')) {
+                closeModal(true);
+            } else if (window.location.hash) {
+                const hashId = window.location.hash.replace('#', '');
+                if (hashId) openModal(hashId, true);
             }
         });
 

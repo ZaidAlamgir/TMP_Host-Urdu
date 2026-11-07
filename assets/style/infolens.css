@@ -3,7 +3,13 @@
    ======================================================== */
 
 html {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
+}
+
+@media (min-width: 1024px) {
+    html {
+        scrollbar-gutter: stable;
+    }
 }
 
 .infolens-page {
@@ -11,6 +17,8 @@ html {
     min-height: 85vh;
     padding-bottom: 90px;
     background-color: #f8fafc;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 html.dark-mode .infolens-page {
@@ -644,6 +652,20 @@ html.dark-mode .infolens-modal-hero-card {
     -webkit-user-select: none;
 }
 
+.infolens-card-media svg,
+.infolens-modal-svg-stage svg,
+.infolens-suggested-card-media svg,
+.infolens-page svg {
+    direction: ltr !important;
+}
+
+.infolens-card-media svg text,
+.infolens-modal-svg-stage svg text,
+.infolens-suggested-card-media svg text,
+.infolens-page svg text {
+    direction: ltr !important;
+}
+
 .infolens-modal-svg-stage svg {
     max-width: 100%;
     max-height: 48vh;
@@ -992,8 +1014,32 @@ html.dark-mode .infolens-suggested-title i {
 @media (max-width: 680px) {
     /* Topbar on mobile: badge & search sit seamlessly together */
     .infolens-topbar {
-        padding: 0.75rem 0.75rem 0.4rem 0.75rem;
+        padding: 0.75rem 0.5rem 0.4rem 0.5rem;
         gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .infolens-categories-nav {
+        padding: 0 0.5rem;
+        margin-bottom: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .infolens-grid-wrapper {
+        padding: 0 6px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .infolens-masonry-grid {
+        column-gap: 8px;
+        width: 100%;
+    }
+
+    .infolens-card {
+        margin-bottom: 8px;
     }
 
     .infolens-pill-badge {
@@ -1100,155 +1146,5 @@ html.dark-mode .infolens-suggested-title i {
 
     .infolens-suggested-card {
         margin-bottom: 10px;
-    }
-}
-
-
-/* ========================================================
-   URDU RTL & NASTALIQ TYPOGRAPHY ADAPTATIONS
-   ======================================================== */
-.infolens-page[dir="rtl"],
-[dir="rtl"] .infolens-page {
-    direction: rtl;
-    text-align: right;
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
-}
-
-/* ========================================================
-   CRITICAL SVG CARTESIAN COORDINATE ISOLATION
-   In SVG 1.1/2, inheriting direction: rtl from an HTML parent
-   flips text-anchor (start becomes right-anchored drawing to negative X)
-   which conflicts with the fixed (x,y) Cartesian coordinates of translated SVGs.
-   Setting direction: ltr on SVGs preserves the chart author's intended (x,y)
-   coordinates while Unicode Bidi continues to correctly shape Urdu Arabic script.
-   ======================================================== */
-.infolens-card-media svg,
-.infolens-modal-svg-stage svg,
-.infolens-suggested-card-media svg,
-.infolens-page svg {
-    direction: ltr !important;
-}
-
-.infolens-card-media svg text,
-.infolens-modal-svg-stage svg text,
-.infolens-suggested-card-media svg text,
-.infolens-page svg text {
-    direction: ltr !important;
-}
-
-[dir="rtl"] .infolens-pill-badge {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-}
-
-/* RTL Search Input */
-[dir="rtl"] .infolens-search-wrapper {
-    direction: rtl;
-}
-
-[dir="rtl"] .infolens-search-icon {
-    left: auto;
-    right: 16px;
-}
-
-[dir="rtl"] .infolens-search-clear {
-    right: auto;
-    left: 14px;
-}
-
-[dir="rtl"] .infolens-search-input {
-    padding: 0 44px 0 44px;
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    text-align: right;
-}
-
-/* Category explore pills */
-[dir="rtl"] .infolens-cat-btn {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    gap: 8px;
-}
-
-/* Card titles and text */
-[dir="rtl"] .infolens-card-title {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    line-height: 1.5;
-    font-size: 1.05rem;
-}
-
-[dir="rtl"] .infolens-card-desc {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    line-height: 1.7;
-}
-
-[dir="rtl"] .infolens-card-pill-svg {
-    left: auto;
-    right: 12px;
-}
-
-/* Modal RTL */
-[dir="rtl"] .infolens-modal-close-btn {
-    right: auto;
-    left: 14px;
-}
-
-[dir="rtl"] .infolens-modal-info-pane {
-    text-align: right;
-}
-
-[dir="rtl"] .infolens-modal-title {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    line-height: 1.45;
-}
-
-[dir="rtl"] .infolens-modal-desc {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    line-height: 1.8;
-}
-
-[dir="rtl"] .infolens-readmore-btn {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-}
-
-[dir="rtl"] .infolens-modal-takeaways {
-    border-left: none;
-    border-right: 3px solid #0284c7;
-    border-radius: 12px 0 0 12px;
-}
-
-html.dark-mode [dir="rtl"] .infolens-modal-takeaways {
-    border-right-color: #38bdf8;
-}
-
-[dir="rtl"] .infolens-takeaways-list {
-    padding-left: 0;
-    padding-right: 20px;
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-    line-height: 1.8;
-}
-
-[dir="rtl"] .infolens-btn-primary,
-[dir="rtl"] .infolens-btn-secondary {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-}
-
-[dir="rtl"] .infolens-suggested-title {
-    font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', system-ui, sans-serif;
-}
-
-/* Mobile RTL overrides */
-@media (max-width: 680px) {
-    [dir="rtl"] .infolens-modal-close-btn {
-        right: auto !important;
-        left: 10px !important;
-    }
-    [dir="rtl"] .infolens-search-icon {
-        left: auto !important;
-        right: 12px !important;
-    }
-    [dir="rtl"] .infolens-search-clear {
-        right: auto !important;
-        left: 10px !important;
-    }
-    [dir="rtl"] .infolens-search-input {
-        padding: 0 36px 0 36px !important;
     }
 }

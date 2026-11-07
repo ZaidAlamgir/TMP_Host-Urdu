@@ -658,13 +658,50 @@
         }, { passive: false });
     }
 
+    // --- DEDUPLICATION ENGINE ---
+    // Guarantees zero duplicate cards (collapses art-svg- and standalone duplicates by core ID, slug & title)
+    function deduplicateInfolensItems(items) {
+        if (!Array.isArray(items)) return [];
+        const seenKeys = new Set();
+        const deduplicated = [];
+
+        // Standalone infographics take priority over extracted article SVGs
+        const sorted = [...items].sort((a, b) => {
+            const aIsArt = String(a.id || '').startsWith('art-svg-');
+            const bIsArt = String(b.id || '').startsWith('art-svg-');
+            if (aIsArt && !bIsArt) return 1;
+            if (!aIsArt && bIsArt) return -1;
+            return 0;
+        });
+
+        for (const item of sorted) {
+            if (!item || !item.id) continue;
+            const coreId = String(item.id || '').replace(/^art-svg-/, '').toLowerCase().trim();
+            const normTitle = String(item.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            const idKey = 'id:' + coreId;
+            const titleKey = normTitle ? 'title:' + normTitle : null;
+
+            if (seenKeys.has(idKey) || (titleKey && seenKeys.has(titleKey))) {
+                continue;
+            }
+
+            seenKeys.add(idKey);
+            if (titleKey) seenKeys.add(titleKey);
+            deduplicated.push(item);
+        }
+
+        return deduplicated;
+    }
+
     // --- RENDER MAIN PINTEREST MASONRY GRID ---
     function renderGrid() {
         const grid = document.getElementById('infolens-grid');
         if (!grid) return;
 
         // Filter items
-        const filtered = INFOLENS_DATA.filter(item => {
+        const deduplicated = deduplicateInfolensItems(INFOLENS_DATA);
+        const filtered = deduplicated.filter(item => {
             const matchesCategory = (currentCategory === 'all') || (item.category === currentCategory);
             const textToSearch = (item.title + ' ' + (item.description || '') + ' ' + (item.tags || []).join(' ')).toLowerCase();
             const matchesSearch = !searchQuery || textToSearch.includes(searchQuery.toLowerCase().trim());
@@ -888,6 +925,9 @@
         if (!appContainer || appContainer._infolensInitialized) return;
         appContainer._infolensInitialized = true;
 
+        // Deduplicate dataset before initial render
+        INFOLENS_DATA = deduplicateInfolensItems(INFOLENS_DATA);
+
         // 1. Initial Grid Render
         renderGrid();
 
@@ -904,10 +944,9 @@
                 .then(data => {
                     isFetchingFeed = false;
                     if (data && Array.isArray(data.items) && data.items.length > 0) {
-                        const existingIds = new Set(INFOLENS_DATA.map(x => x.id));
-                        const newItems = data.items.filter(x => !existingIds.has(x.id));
-                        if (newItems.length > 0) {
-                            INFOLENS_DATA = INFOLENS_DATA.concat(newItems);
+                        const beforeLen = INFOLENS_DATA.length;
+                        INFOLENS_DATA = deduplicateInfolensItems(INFOLENS_DATA.concat(data.items));
+                        if (INFOLENS_DATA.length !== beforeLen) {
                             renderGrid();
                             if (currentActivePin) {
                                 renderSuggestedGrid(currentActivePin.id);
@@ -932,10 +971,11 @@
             })
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
+                    const cleanData = deduplicateInfolensItems(data);
                     const existingIds = INFOLENS_DATA.map(x => x.id).join(',');
-                    const newIds = data.map(x => x.id).join(',');
+                    const newIds = cleanData.map(x => x.id).join(',');
                     if (existingIds !== newIds) {
-                        INFOLENS_DATA = data;
+                        INFOLENS_DATA = cleanData;
                         renderGrid();
                         if (currentActivePin) {
                             renderSuggestedGrid(currentActivePin.id);

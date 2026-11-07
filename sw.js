@@ -1,6 +1,6 @@
-const CORE_CACHE = 'tmp-core-v43';
-const ARTICLE_CACHE = 'tmp-articles-v43';
-const ASSET_CACHE = 'tmp-assets-v43';
+const CORE_CACHE = 'tmp-core-v45';
+const ARTICLE_CACHE = 'tmp-articles-v45';
+const ASSET_CACHE = 'tmp-assets-v45';
 const CORE_ASSETS = [
     '/offline.html',  
     'https://author.tmpnews.com/profile/tmpnews.webp',     
@@ -55,10 +55,9 @@ self.addEventListener('message', (event) => {
 });
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting(); 
     event.waitUntil(
         caches.open(CORE_CACHE).then(async (cache) => {
-            console.log('SW: Caching Core App Shell v43');
+            console.log('SW: Pre-caching Core App Shell', CORE_CACHE);
             for (let asset of CORE_ASSETS) {
                 try {
                     const response = await fetch(asset, { cache: 'reload' });
@@ -66,9 +65,12 @@ self.addEventListener('install', (event) => {
                         await cache.put(asset, response);
                     }
                 } catch (err) {
-                    console.error(`SW Install: Network error on ${asset}`);
+                    console.error(`SW Install: Network error on ${asset}`, err);
                 }
             }
+        }).then(() => {
+            console.log('SW: Pre-caching complete. Activating immediately via skipWaiting.');
+            return self.skipWaiting();
         })
     );
 });
@@ -84,6 +86,8 @@ self.addEventListener('activate', (event) => {
                 })
             );
         }).then(() => {
+            return self.clients.claim();
+        }).then(() => {
             return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
                 clients.forEach((client) => {
                     client.postMessage({ type: 'SW_ACTIVATED', version: CORE_CACHE });
@@ -91,7 +95,6 @@ self.addEventListener('activate', (event) => {
             });
         })
     );
-    return self.clients.claim(); 
 });
 self.addEventListener('fetch', (event) => {
     const request = event.request;
@@ -119,6 +122,26 @@ self.addEventListener('fetch', (event) => {
         request.headers.get('accept')?.includes('application/json')
     ) {
         return; 
+    }
+
+    // If forced refresh (Ctrl+Shift+R or cache bypass), NEVER serve stale cache!
+    // Fetch fresh from network, update cache, and return fresh response immediately.
+    if (hasForcedBypass) {
+        event.respondWith(
+            fetch(request, { cache: 'reload' }).then((networkResponse) => {
+                if (networkResponse && networkResponse.ok) {
+                    const responseClone = networkResponse.clone();
+                    const isCore = CORE_ASSETS.some(a => url.pathname === a || url.pathname.endsWith(a));
+                    const isHtml = request.headers.get('accept')?.includes('text/html');
+                    const targetCache = isCore ? CORE_CACHE : (isHtml ? ARTICLE_CACHE : ASSET_CACHE);
+                    caches.open(targetCache).then((cache) => cache.put(request, responseClone));
+                }
+                return networkResponse;
+            }).catch(() => {
+                return caches.match(request).then(cached => cached || (request.headers.get('accept')?.includes('text/html') ? caches.match('/offline.html') : null));
+            })
+        );
+        return;
     }
 
     // Live scripts, live styles & InfoLens assets: Network-First strategy

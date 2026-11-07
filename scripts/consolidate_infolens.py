@@ -163,6 +163,11 @@ def extract_svgs_from_article(file_path, cutoff_date=""):
         meta = parse_simple_yaml(frontmatter_raw)
         body = content[fm_match.end():]
 
+        # Standalone InfoLens infographics have categoryLabel or aspectRatio
+        # which normal editorial news articles never possess. Skip them if encountered in article paths.
+        if 'categoryLabel' in meta or 'aspectRatio' in meta:
+            return []
+
         # Article date and cutoff check
         basename = os.path.splitext(os.path.basename(file_path))[0]
         date_str = str(meta.get('date', ''))[:10]
@@ -339,6 +344,17 @@ def main():
 
     infographics = []
     seen_ids = set()
+    seen_slugs = set()
+    seen_titles = set()
+    seen_svg_hashes = set()
+
+    def normalize_title(t):
+        return re.sub(r'[^a-z0-9]', '', str(t).lower())
+
+    def svg_hash(s):
+        import hashlib
+        clean = re.sub(r'\s+', '', str(s).lower())
+        return hashlib.md5(clean.encode('utf-8')).hexdigest()
 
     # 1. Ingest standalone infographics from dedicated SVG repository
     if os.path.exists(args.src):
@@ -359,8 +375,12 @@ def main():
                 if item_date and item_date < cutoff_date:
                     continue
 
-                if info["id"] not in seen_ids:
-                    seen_ids.add(info["id"])
+                info_id = str(info["id"]).strip()
+                if info_id not in seen_ids:
+                    seen_ids.add(info_id)
+                    seen_slugs.add(info_id.lower())
+                    seen_titles.add(normalize_title(info.get("title", "")))
+                    seen_svg_hashes.add(svg_hash(info.get("svgContent", "")))
                     infographics.append(info)
 
     standalone_count = len(infographics)
@@ -378,21 +398,43 @@ def main():
     article_svg_count = 0
     if os.path.exists(posts_dir):
         for root, dirs, files in os.walk(posts_dir):
-            if 'archive' in root.split(os.sep):
+            parts = root.split(os.sep)
+            # Never scan standalone infolens repo directories or _infolens collection
+            if 'infolens' in parts or '_infolens' in parts or 'archive' in parts:
                 continue
 
             for fname in files:
                 if not fname.endswith('.md'):
                     continue
 
+                # Strip date to get core slug
+                base_slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', os.path.splitext(fname)[0]).lower()
+                if base_slug in seen_slugs or base_slug in seen_ids:
+                    continue
+
                 fpath = os.path.join(root, fname)
                 article_svgs = extract_svgs_from_article(fpath, cutoff_date)
                 for svg_item in article_svgs:
-                    if svg_item["id"] not in seen_ids:
-                        seen_ids.add(svg_item["id"])
-                        infographics.append(svg_item)
-                        article_svg_count += 1
-                        print(f"  + Extracted SVG: '{svg_item['title']}' from {fname}")
+                    raw_id = svg_item["id"]
+                    core_id = re.sub(r'^art-svg-', '', raw_id).lower()
+                    norm_title = normalize_title(svg_item.get("title", ""))
+                    s_hash = svg_hash(svg_item.get("svgContent", ""))
+
+                    # Deduplication guard: ignore if core_id, title, or SVG content already exists
+                    if (raw_id in seen_ids or
+                        core_id in seen_slugs or
+                        core_id in seen_ids or
+                        norm_title in seen_titles or
+                        s_hash in seen_svg_hashes):
+                        continue
+
+                    seen_ids.add(raw_id)
+                    seen_slugs.add(core_id)
+                    seen_titles.add(norm_title)
+                    seen_svg_hashes.add(s_hash)
+                    infographics.append(svg_item)
+                    article_svg_count += 1
+                    print(f"  + Extracted SVG: '{svg_item['title']}' from {fname}")
 
     print(f"Article embedded SVGs extracted: {article_svg_count}")
     print(f"Total combined infographics:     {len(infographics)}")

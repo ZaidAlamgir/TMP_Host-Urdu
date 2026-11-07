@@ -79,6 +79,9 @@ def main():
     for root, dirs, files in os.walk(args.src):
         # We only care about files under a 'posts' or '_posts' directory
         parts = root.split(os.sep)
+        # Exclude dedicated infolens infographics repo from article _posts
+        if 'infolens' in parts or '_infolens' in parts:
+            continue
         if 'posts' not in parts and '_posts' not in parts:
             continue
 

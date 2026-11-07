@@ -36,6 +36,7 @@ include:
   - infolens.html
   - infolens.json
   - archive-spotlight.json
+  - archive-spotlight.min.json
   - about.html
   - news-hub.html 
   - post.html

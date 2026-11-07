@@ -22,23 +22,65 @@ export async function onRequest(context) {
   }
 
   try {
+    // 1. Primary query: Evergreen In-Depth, Analysis, History, Geopolitical Reports
     const query = `
-      SELECT slug, title, category, date, image 
+      SELECT slug, title, category, date, image, tags
       FROM articles 
-      WHERE (LOWER(category) LIKE '%analysis%' OR LOWER(category) LIKE '%history%' OR category LIKE '%تاریخ%' OR category LIKE '%تجزیہ%')
-        AND image IS NOT NULL AND image != ''
+      WHERE image IS NOT NULL AND image != ''
+        AND (
+          LOWER(category) LIKE '%analysis%' 
+          OR LOWER(category) LIKE '%history%'
+          OR LOWER(category) LIKE '%strategic%'
+          OR LOWER(category) LIKE '%defense%'
+          OR LOWER(category) LIKE '%politics%'
+          OR LOWER(category) LIKE '%war%'
+          OR LOWER(category) LIKE '%economy%'
+          OR (tags IS NOT NULL AND (LOWER(tags) LIKE '%analysis%' OR LOWER(tags) LIKE '%history%' OR LOWER(tags) LIKE '%breaking%'))
+          OR LOWER(title) LIKE '%analysis%'
+          OR LOWER(title) LIKE '%history%'
+          OR LOWER(title) LIKE '%report%'
+          OR LOWER(title) LIKE '%crisis%'
+          OR LOWER(slug) LIKE '%analysis%'
+          OR LOWER(slug) LIKE '%history%'
+        )
       ORDER BY RANDOM() 
       LIMIT 10
     `;
-    const { results } = await db.prepare(query).all();
+    let { results } = await db.prepare(query).all();
+    results = results || [];
 
-    const posts = (results || []).map(a => {
-      const catSlug = (a.category || '')
+    // 2. Always guarantee 10 cards: If database has fewer than 10 matching, fill with any archive articles
+    if (results.length < 10) {
+      const existingSlugs = new Set(results.map(r => r.slug));
+      const needed = 10 - results.length;
+      try {
+        const fillRes = await db.prepare(`
+          SELECT slug, title, category, date, image, tags
+          FROM articles 
+          WHERE image IS NOT NULL AND image != ''
+          ORDER BY RANDOM()
+          LIMIT ?
+        `).bind(needed + 5).all();
+        for (const row of (fillRes.results || [])) {
+          if (!existingSlugs.has(row.slug)) {
+            existingSlugs.add(row.slug);
+            results.push(row);
+            if (results.length >= 10) break;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fill archive spotlight:", e);
+      }
+    }
+
+    const posts = results.map(a => {
+      let catSlug = (a.category || '')
         .toLowerCase()
         .replace(/&/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-      const url = catSlug ? `/news/${catSlug}/${a.slug}/` : `/news/${a.slug}/`;
+      if (catSlug === '[]' || catSlug === '') catSlug = 'news';
+      const url = `/news/${catSlug}/${a.slug}/`;
       const dateObj = new Date(a.date);
       const displayDate = !isNaN(dateObj.getTime())
         ? dateObj.toLocaleDateString('ur-PK', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -50,7 +92,8 @@ export async function onRequest(context) {
         display_date: displayDate,
         image: a.image,
         category: a.category || 'تجزیہ',
-        read_time: 5
+        read_time: 5,
+        is_local: false
       };
     });
 
@@ -58,7 +101,7 @@ export async function onRequest(context) {
       headers: corsHeaders
     });
   } catch (err) {
-    console.error("D1 Urdu archive-spotlight error:", err);
+    console.error("D1 archive-spotlight error:", err);
     return new Response(JSON.stringify({ error: err.message, posts: [] }), {
       status: 200,
       headers: corsHeaders

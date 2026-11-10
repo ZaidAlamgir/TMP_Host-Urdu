@@ -439,8 +439,16 @@ def main():
     print(f"Article embedded SVGs extracted: {article_svg_count}")
     print(f"Total combined infographics:     {len(infographics)}")
 
-    # 3. Sort descending by date (most recent first)
-    infographics.sort(key=lambda x: (x.get("date", ""), x.get("id", "")), reverse=True)
+    # 3. Sort descending by date (most recent first, with future-date guard)
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    def sort_infolens_key(item):
+        d = str(item.get("date", "")).strip()[:10]
+        # Guard against accidental future dates pinning dummy items above live published graphics
+        if d > today_str:
+            d = today_str
+        return (d, item.get("id", ""))
+
+    infographics.sort(key=sort_infolens_key, reverse=True)
 
     # 4. Copy / Write to Jekyll collection directory (_infolens)
     if args.dest_collection:

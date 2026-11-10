@@ -992,14 +992,18 @@
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
                     const cleanData = deduplicateInfolensItems(data);
-                    const existingIds = INFOLENS_DATA.map(x => x.id).join(',');
-                    const newIds = cleanData.map(x => x.id).join(',');
-                    if (existingIds !== newIds) {
-                        INFOLENS_DATA = cleanData;
-                        renderGrid();
-                        if (currentActivePin) {
-                            renderSuggestedGrid(currentActivePin.id);
+                    INFOLENS_DATA = cleanData;
+                    renderGrid();
+                    if (currentActivePin) {
+                        const updatedPin = INFOLENS_DATA.find(x => x.id === currentActivePin.id);
+                        if (updatedPin) {
+                            currentActivePin = updatedPin;
+                            const modalMediaPane = document.getElementById('infolens-modal-media-pane');
+                            if (modalMediaPane && updatedPin.svgContent) {
+                                modalMediaPane.innerHTML = updatedPin.svgContent;
+                            }
                         }
+                        renderSuggestedGrid(currentActivePin.id);
                     }
                 } else {
                     fetchEdgeFeed(1);

@@ -24,7 +24,35 @@ import argparse
 from datetime import datetime, timezone, timedelta
 
 FRONTMATTER_REGEX = re.compile(r'^---\s*\n(.*?)\n---\s*\n', re.DOTALL)
-SVG_REGEX = re.compile(r'(<svg[\s\S]*?</svg>)', re.IGNORECASE)
+
+def extract_outer_svgs(text):
+    """
+    Depth-aware SVG parser that extracts all top-level <svg>...</svg> blocks
+    without prematurely terminating when nested <svg> elements (such as inner
+    conformal maps, coordinate overlays, or watermark logos) are encountered.
+    """
+    results = []
+    pattern = re.compile(r'(<svg\b[^>]*?(?:/>|>)|</svg\s*>)', re.IGNORECASE)
+    depth = 0
+    start_pos = -1
+
+    for match in pattern.finditer(text):
+        tag = match.group(1).lower()
+        if tag.startswith('</svg'):
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start_pos != -1:
+                    results.append(text[start_pos:match.end()])
+                    start_pos = -1
+        elif tag.endswith('/>'):
+            if depth == 0:
+                results.append(match.group(1))
+        else:
+            if depth == 0:
+                start_pos = match.start()
+            depth += 1
+
+    return results
 
 # Mapping from article categories to InfoLens 8 canonical categories
 CATEGORY_MAP = {
@@ -108,11 +136,11 @@ def extract_infographic(file_path):
         meta = parse_simple_yaml(frontmatter_raw)
 
         body = content[fm_match.end():]
-        svg_match = SVG_REGEX.search(body)
-        if not svg_match:
+        svgs = extract_outer_svgs(body)
+        if not svgs:
             return None
 
-        svg_content = svg_match.group(1).strip()
+        svg_content = svgs[0].strip()
         svg_clean = re.sub(r'[\r\n\t]+', ' ', svg_content)
         svg_clean = re.sub(r'\s{2,}', ' ', svg_clean)
 
@@ -212,21 +240,29 @@ def extract_svgs_from_article(file_path, cutoff_date=""):
 
         # Scan for <figure class="tmp-editorial-svg-figure"> or standalone <svg>
         figure_pattern = re.compile(
-            r'(<figure[^>]*class=[\'"][^\'"]*tmp-editorial-svg-figure[^\'"]*[\'"][^>]*>[\s\S]*?</figure>)|(<svg[\s\S]*?</svg>)',
+            r'(<figure[^>]*class=[\'"][^\'"]*tmp-editorial-svg-figure[^\'"]*[\'"][^>]*>[\s\S]*?</figure>)',
             re.IGNORECASE
         )
 
         matches = figure_pattern.findall(body)
+        blocks = []
+        if matches:
+            for fig_block in matches:
+                blocks.append((fig_block, True))
+        else:
+            outer_svgs = extract_outer_svgs(body)
+            for s in outer_svgs:
+                blocks.append((s, False))
+
         results = []
         svg_index = 0
 
-        for fig_match, standalone_svg in matches:
-            block = fig_match if fig_match else standalone_svg
-            svg_inner = SVG_REGEX.search(block)
-            if not svg_inner:
+        for block, is_figure in blocks:
+            svgs = extract_outer_svgs(block)
+            if not svgs:
                 continue
 
-            svg_content = svg_inner.group(1).strip()
+            svg_content = svgs[0].strip()
             # Clean whitespace
             svg_clean = re.sub(r'[\r\n\t]+', ' ', svg_content)
             svg_clean = re.sub(r'\s{2,}', ' ', svg_clean)
